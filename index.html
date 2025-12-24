@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            padding: 20px 0;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 課程卡片樣式 - 網頁版 */
+        .course-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            background-color: #fafbfc;
+            transition: all 0.2s;
+        }
+
+        .course-card:hover {
+            border-color: #b6d4fe;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12);
+        }
+
+        .course-info {
+            flex: 1;
+            padding-right: 20px;
+        }
+
+        /* 課程標題 */
+        .course-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a5fb4;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        /* 日期時間區 */
+        .course-datetime {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .course-datetime span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 課程詳細資訊 */
+        .course-details {
+            font-size: 0.88rem;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .course-details .detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .course-details .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .course-details .label {
+            color: #888;
+        }
+
+        .course-details .value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 課程類別 */
+        .course-category {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .course-category .label {
+            color: #888;
+        }
+
+        .course-category .value {
+            color: #0d6efd;
+        }
+
+        /* 標籤區 */
+        .course-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .course-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .course-tag.tag-nursing {
+            border-color: #0d6efd;
+            color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+
+        .course-tag.tag-quality {
+            border-color: #198754;
+            color: #198754;
+            background-color: #d1e7dd;
+        }
+
+        .course-tag.tag-subtitle {
+            border-color: #6f42c1;
+            color: #6f42c1;
+            background-color: #e2d9f3;
+        }
+
+        .course-tag.tag-broadcast {
+            border-color: #fd7e14;
+            color: #fd7e14;
+            background-color: #fff3cd;
+        }
+
+        /* 篩選區域 */
+        .filter-section {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-section h6 {
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 25px;
+            border: 2px solid #dee2e6;
+            background-color: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: #adb5bd;
+            background-color: #f8f9fa;
+        }
+
+        .filter-btn.active {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .filter-btn.filter-broadcast.active {
+            border-color: #fd7e14;
+            background-color: #fff3cd;
+            color: #fd7e14;
+        }
+
+        .filter-btn.filter-nursing.active {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .filter-btn.filter-quality.active {
+            border-color: #198754;
+            background-color: #d1e7dd;
+            color: #198754;
+        }
+
+        .filter-btn.filter-subtitle.active {
+            border-color: #6f42c1;
+            background-color: #e2d9f3;
+            color: #6f42c1;
+        }
+
+        .filter-count {
+            display: inline-block;
+            min-width: 24px;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 12px;
+            background-color: #e9ecef;
+            color: #666;
+        }
+
+        .filter-btn.active .filter-count {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .course-card.hidden-by-filter {
+            display: none !important;
+        }
+
+        /* 預購人數輸入區 */
+        .input-section {
+            min-width: 100px;
+            text-align: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            flex-shrink: 0;
+        }
+
+        .input-section label {
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .input-section input {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* 手機版響應式 */
+        @media (max-width: 576px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .container {
+                padding: 10px;
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .course-card {
+                flex-direction: column;
+                padding: 12px;
+            }
+
+            .course-info {
+                padding-right: 0;
+                width: 100%;
+            }
+
+            .course-title {
+                font-size: 1rem;
+                word-wrap: break-word;
+            }
+
+            .course-datetime {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .course-details .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .input-section {
+                width: 100%;
+                margin-top: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 15px;
+            }
+
+            .input-section label {
+                margin-bottom: 0;
+                margin-right: 15px;
+            }
+
+            .input-section input {
+                width: 80px;
+            }
+
+            /* 篩選區域手機版 */
+            .filter-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .filter-section h6 {
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            .filter-tags {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                flex: 1 1 calc(50% - 8px);
+                justify-content: center;
+                min-width: 0;
+            }
+
+            .filter-count {
+                min-width: 20px;
+                padding: 2px 5px;
+                font-size: 0.7rem;
+            }
+
+            /* 標籤手機版 */
+            .course-tags {
+                flex-wrap: wrap;
+            }
+
+            .course-tag {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+            }
+
+            /* 課程類別手機版 */
+            .course-category .value {
+                word-wrap: break-word;
+                display: block;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader" class="loading-overlay">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="mt-3 fw-bold text-secondary">正在讀取最新課程資訊...</div>
+    </div>
+
+    <div class="container" id="form-container">
+        <div class="text-center mb-4">
+            <img src="https://www.gogocare.com.tw/UserFiles/uploads/images/20251223161024_GOGOCARE_BAN.png"
+                alt="GOGOCARE" class="img-fluid" style="max-width: 100%; border-radius: 10px;">
+        </div>
+        <h2 class="text-center mb-4 fw-bold">課程預購需求調查表</h2>
+        <p class="alert text-center mb-4" style="background-color: #dcdddd; border-color: #ccc; color: #333;">
+            請在您有興趣的課程後方填寫欲報名/購買人數。<br>
+            <small>※ 積分屬性、類別詳細以審查單位通過為主<br>※ 實際開課以當月公告為準。</small>
+        </p>
+
+        <form id="courseForm" onsubmit="handleFormSubmit(this)">
+            <!-- 篩選區域 -->
+            <div class="filter-section">
+                <h6>🔍 依標籤篩選課程</h6>
+                <div class="filter-tags">
+                    <button type="button" class="filter-btn filter-broadcast" data-tag="轉播課程"
+                        onclick="toggleFilter(this)">
+                        📺 轉播課程 <span class="filter-count" id="count-broadcast">0</span>
+                    </button>
+                    <button type="button" class="filter-btn filter-nursing" data-tag="同步護理積分"
+                        onclick="toggleFilter(this)">
+                        🏥 同步護理積分 <span class="filter-count" id="count-nursing">0</span>
+                    </button>
+                    <button type="button" class="filter-btn filter-quality" data-tag="住宿機構品質獎勵"
+                        onclick="toggleFilter(this)">
+                        🏆 住宿機構品質獎勵 <span class="filter-count" id="count-quality">0</span>
+                    </button>
+                    <button type="button" class="filter-btn filter-subtitle" data-tag="多語字幕"
+                        onclick="toggleFilter(this)">
+                        🌐 多語字幕 <span class="filter-count" id="count-subtitle">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="course-list">
+                <!-- JS 生成內容 -->
+            </div>
+
+            <div class="p-4 bg-light rounded-3 mt-5">
+                <h5 class="mb-3 fw-bold">填寫聯絡資訊</h5>
+                <div class="mb-3">
+                    <label for="companyName" class="form-label">1. 公司/單位名稱 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="companyName" name="companyName" required
+                        placeholder="請輸入公司或單位名稱">
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">2. 您的電子信箱 <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" id="email" name="email" required
+                        placeholder="name@example.com">
+                    <div class="form-text">系統將會自動發送確認信至此信箱。</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="otherNeeds" class="form-label">3. 有沒有其他課程需求? 我們可以協助媒合開課喔。(填上預計上課人數)</label>
+                    <textarea class="form-control" id="otherNeeds" name="otherNeeds" rows="3"
+                        placeholder="請填寫您的需求..."></textarea>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">送出預購需求</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 成功畫面 -->
+    <div class="container hidden" id="success-container">
+        <div class="text-center py-5">
+            <div style="font-size: 4rem; color: #198754;">✔</div>
+            <h3 class="mt-3">需求單已送出！</h3>
+            <div id="email-info">
+                <p class="text-muted">確認信已寄送至：<span id="success-email" class="fw-bold text-dark"></span></p>
+                <p class="text-muted">想看更多課程資訊，請見 <a
+                        href="https://docs.google.com/spreadsheets/d/1CRQMLPQp5fBARvG1U7o9aOru-YTkXGfiQBxrDFZB_Z4/edit?gid=1524737083#gid=1524737083&range=A1:F1"
+                        target="_blank" class="fw-bold">2026_課程總表</a></p>
+            </div>
+
+            <div class="card mt-4 text-start shadow-sm">
+                <div class="card-header bg-success text-white">您的預購清單</div>
+                <div class="card-body p-0">
+                    <div id="success-list"></div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-outline-secondary" onclick="resetForm()">填寫新表單</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 請替換 Index.html 最下方的 <script>區塊 -->
+    <script>
+        // ========== 設定區域 ==========
+        // 請將此 URL 替換為您部署的 GAS Web App URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzY8epjSzWX-_KXHnZ2pfbRmrlM1MhYx2aGb82aL3-86aZDaMin5Vl1ZsMHwAykcVQnPg/exec';
+
+        // 頁面載入時取得資料
+        window.onload = function () {
+            console.log("步驟 1: 網頁載入完成，準備呼叫後端...");
+
+            // 使用 fetch 呼叫 GAS API
+            fetch(API_URL + '?action=getCourseData')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('網路回應錯誤: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("步驟 2: 成功收到後端資料！", data);
+                    renderCourses(data);
+                })
+                .catch(error => {
+                    console.error("步驟 2: 呼叫失敗！錯誤原因：", error);
+                    alert("讀取失敗，請確認 API 網址是否正確：\n" + error);
+                    document.getElementById('loader').innerText = "讀取發生錯誤，請檢查 API 設定或網路。";
+                });
+        };
+
+        function renderCourses(courses) {
+            console.log("步驟 3: 開始繪製畫面，資料筆數：" + courses.length);
+            const listDiv = document.getElementById('course-list');
+
+            if (courses.length === 0) {
+                listDiv.innerHTML = '<div class="alert alert-warning">目前沒有課程資料，或無法讀取試算表。</div>';
+                document.getElementById('loader').classList.add('hidden');
+                return;
+            }
+
+            let html = '';
+            courses.forEach(course => {
+                // 產生標籤 HTML
+                let tagsHtml = '';
+                let tagsData = course.tags ? course.tags.join(',') : '';
+                if (course.tags && course.tags.length > 0) {
+                    course.tags.forEach(tag => {
+                        let tagClass = 'course-tag';
+                        if (tag === '同步護理積分') tagClass += ' tag-nursing';
+                        else if (tag === '住宿機構品質獎勵') tagClass += ' tag-quality';
+                        else if (tag === '多語字幕') tagClass += ' tag-subtitle';
+                        else if (tag === '轉播課程') tagClass += ' tag-broadcast';
+                        tagsHtml += `<span class="${tagClass}">${tag}</span>`;
+                    });
+                }
+
+                html += `
+          <div class="course-card" data-tags="${tagsData}">
+            <div class="course-info">
+              <!-- 課程標題 -->
+              <div class="course-title">${course.displayNameHtml || course.rawNames || '課程名稱待定'}</div>
+              
+              <!-- 日期時間 -->
+              <div class="course-datetime">
+                <span>📅 ${course.date || '日期待定'}${course.date ? '' : ''}</span>
+                <span>🕒 ${course.time || '時間待定'}</span>
+              </div>
+              
+              <!-- 課程詳細資訊 -->
+              <div class="course-details">
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <span class="label">上課方式：</span>
+                    <span class="value">${course.teachingMethod || '-'}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">時數：</span>
+                    <span class="value">${course.hours ? course.hours + ' 小時' : '-'}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">預計積分數：</span>
+                    <span class="value">${course.credits || '-'}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 課程類別 -->
+              ${course.category ? `
+              <div class="course-category">
+                <span class="label">課程類別：</span>
+                <span class="value">${course.category}</span>
+              </div>
+              ` : ''}
+              
+              <!-- 標籤 -->
+              ${tagsHtml ? `<div class="course-tags">${tagsHtml}</div>` : ''}
+            </div>
+            
+            <!-- 預購人數輸入 -->
+            <div class="input-section">
+              <label>預購人數</label>
+              <input type="number" class="form-control text-center" name="qty_${course.id}" min="0" placeholder="0">
+            </div>
+          </div>
+        `;
+            });
+
+            listDiv.innerHTML = html;
+            // 隱藏讀取動畫
+            document.getElementById('loader').classList.add('hidden');
+            // 更新標籤計數
+            updateTagCounts();
+            console.log("步驟 4: 畫面繪製完成");
+        }
+
+        // 處理表單提交
+        function handleFormSubmit(formElement) {
+            event.preventDefault();
+
+            // 收集課程資料
+            const courses = [];
+            formElement.querySelectorAll('input[type="number"]').forEach(input => {
+                const qty = parseInt(input.value);
+                if (qty > 0) {
+                    const courseId = input.name.replace('qty_', '');
+                    courses.push({ id: courseId, qty: qty });
+                }
+            });
+
+            if (courses.length === 0) {
+                alert("請至少在一個課程欄位填寫人數！");
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "處理中...";
+
+            const loader = document.getElementById('loader');
+            loader.classList.remove('hidden');
+            loader.querySelector('div.mt-3').innerText = "正在儲存訂單...";
+
+            // 組裝 JSON 資料
+            const formData = {
+                email: formElement.email.value,
+                companyName: formElement.companyName.value,
+                otherNeeds: formElement.otherNeeds.value,
+                courses: courses
+            };
+
+            // 使用 fetch POST 送出資料
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('網路回應錯誤: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(response => onSuccess(response))
+                .catch(error => onFailure(error));
+        }
+
+        function onSuccess(response) {
+            document.getElementById('loader').classList.add('hidden');
+            if (response.status === 'success') {
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-container').classList.remove('hidden');
+
+                // 根據郵件發送狀態顯示不同訊息
+                const emailInfoEl = document.getElementById('email-info');
+                const courseListLink = '<p class="text-muted">想看更多課程資訊，請見 <a href="https://docs.google.com/spreadsheets/d/1CRQMLPQp5fBARvG1U7o9aOru-YTkXGfiQBxrDFZB_Z4/edit?gid=1524737083#gid=1524737083&range=A1:F1" target="_blank" class="fw-bold">2026_課程總表</a></p>';
+                if (response.emailSent) {
+                    emailInfoEl.innerHTML = '<p class="text-muted">確認信已寄送至：<span id="success-email" class="fw-bold text-dark">' + response.email + '</span></p>' + courseListLink;
+                } else {
+                    emailInfoEl.innerHTML = '<p class="text-warning">⚠️ 郵件發送失敗，但您的預購需求已成功儲存。<br><small class="text-muted">您的信箱：' + response.email + '</small></p>' + courseListLink;
+                    console.error('郵件發送錯誤:', response.emailError);
+                }
+
+                let listHtml = '';
+                response.data.forEach(item => {
+                    // 產生標籤 HTML
+                    let tagsHtml = '';
+                    if (item.tags && item.tags.length > 0) {
+                        item.tags.forEach(tag => {
+                            let tagClass = 'course-tag';
+                            if (tag === '同步護理積分') tagClass += ' tag-nursing';
+                            else if (tag === '住宿機構品質獎勵') tagClass += ' tag-quality';
+                            else if (tag === '多語字幕') tagClass += ' tag-subtitle';
+                            else if (tag === '轉播課程') tagClass += ' tag-broadcast';
+                            tagsHtml += `<span class="${tagClass}">${tag}</span>`;
+                        });
+                    }
+
+                    listHtml += `
+            <div class="course-card">
+              <div class="course-info">
+                <!-- 課程標題 -->
+                <div class="course-title">${item.name || '課程名稱'}</div>
+                
+                <!-- 日期時間 -->
+                <div class="course-datetime">
+                  <span>📅 ${item.date || '日期待定'}</span>
+                  <span>🕒 ${item.time || '時間待定'}</span>
+                </div>
+                
+                <!-- 課程詳細資訊 -->
+                <div class="course-details">
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <span class="label">上課方式：</span>
+                      <span class="value">${item.teachingMethod || '-'}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">時數：</span>
+                      <span class="value">${item.hours ? item.hours + ' 小時' : '-'}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">預計積分數：</span>
+                      <span class="value">${item.credits || '-'}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 課程類別 -->
+                ${item.category ? `
+                <div class="course-category">
+                  <span class="label">課程類別：</span>
+                  <span class="value">${item.category}</span>
+                </div>
+                ` : ''}
+                
+                <!-- 標籤 -->
+                ${tagsHtml ? `<div class="course-tags">${tagsHtml}</div>` : ''}
+              </div>
+              
+              <!-- 預購人數 -->
+              <div class="input-section" style="background: #198754; border-color: #198754;">
+                <label style="color: white;">預購人數</label>
+                <div style="font-size: 1.5rem; font-weight: bold; color: white;">${item.qty} 人</div>
+              </div>
+            </div>
+          `;
+                });
+                document.getElementById('success-list').innerHTML = listHtml;
+
+                // 捲動到頁面頂部
+                window.scrollTo(0, 0);
+            } else {
+                alert("錯誤：" + response.message);
+                resetBtn();
+            }
+        }
+
+        function onFailure(e) {
+            document.getElementById('loader').classList.add('hidden');
+            alert("系統錯誤：" + e);
+            resetBtn();
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerText = "送出需求";
+        }
+
+        // 重置表單（填寫新表單）
+        function resetForm() {
+            // 顯示表單容器，隱藏成功頁面
+            document.getElementById('form-container').classList.remove('hidden');
+            document.getElementById('success-container').classList.add('hidden');
+
+            // 重置表單欄位
+            document.getElementById('courseForm').reset();
+
+            // 重置按鈕狀態
+            resetBtn();
+
+            // 清空成功頁面的資料
+            document.getElementById('email-info').innerHTML = '<p class="text-muted">確認信已寄送至：<span id="success-email" class="fw-bold text-dark"></span></p>';
+            document.getElementById('success-list').innerHTML = '';
+
+            // 捲動到頁面頂部
+            window.scrollTo(0, 0);
+        }
+
+        // ========== 標籤篩選功能 ==========
+        let activeFilters = [];
+
+        // 切換篩選按鈕狀態
+        function toggleFilter(btn) {
+            const tag = btn.getAttribute('data-tag');
+            btn.classList.toggle('active');
+
+            if (btn.classList.contains('active')) {
+                if (!activeFilters.includes(tag)) {
+                    activeFilters.push(tag);
+                }
+            } else {
+                activeFilters = activeFilters.filter(t => t !== tag);
+            }
+
+            applyFilters();
+        }
+
+        // 應用篩選條件
+        function applyFilters() {
+            const cards = document.querySelectorAll('.course-card');
+
+            cards.forEach(card => {
+                const cardTags = card.getAttribute('data-tags') || '';
+
+                if (activeFilters.length === 0) {
+                    // 沒有篩選條件，顯示全部
+                    card.classList.remove('hidden-by-filter');
+                } else {
+                    // 檢查卡片是否包含所有選中的標籤
+                    const hasAllTags = activeFilters.every(filter => cardTags.includes(filter));
+                    if (hasAllTags) {
+                        card.classList.remove('hidden-by-filter');
+                    } else {
+                        card.classList.add('hidden-by-filter');
+                    }
+                }
+            });
+
+            // 顯示篩選結果數量
+            const visibleCount = document.querySelectorAll('.course-card:not(.hidden-by-filter)').length;
+            console.log(`篩選結果：${visibleCount} 個課程`);
+        }
+
+        // 更新各標籤的課程數量
+        function updateTagCounts() {
+            const cards = document.querySelectorAll('.course-card');
+            let counts = {
+                '轉播課程': 0,
+                '同步護理積分': 0,
+                '住宿機構品質獎勵': 0,
+                '多語字幕': 0
+            };
+
+            cards.forEach(card => {
+                const tags = card.getAttribute('data-tags') || '';
+                if (tags.includes('轉播課程')) counts['轉播課程']++;
+                if (tags.includes('同步護理積分')) counts['同步護理積分']++;
+                if (tags.includes('住宿機構品質獎勵')) counts['住宿機構品質獎勵']++;
+                if (tags.includes('多語字幕')) counts['多語字幕']++;
+            });
+
+            document.getElementById('count-broadcast').textContent = counts['轉播課程'];
+            document.getElementById('count-nursing').textContent = counts['同步護理積分'];
+            document.getElementById('count-quality').textContent = counts['住宿機構品質獎勵'];
+            document.getElementById('count-subtitle').textContent = counts['多語字幕'];
+        }
+    </script>
