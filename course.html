@@ -23,11 +23,20 @@
   --danger:#dc2626;
   --btn-dark:#1e3a8a;
 }
-html,body{margin:0;padding:0;}
+
+/* 關鍵：html 不要設 height:100%，讓 body 自然長到內容高度 */
+html { margin:0; padding:0; }
 body{
+  margin:0;
+  padding:0;
   background:var(--bg);
   font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
   color:var(--text);
+}
+
+/* 用一個明確的 wrapper 包所有內容，方便量測 */
+#measure-wrapper {
+  width: 100%;
 }
 
 .hero{background:#fff;border-bottom:3px solid var(--accent);padding:36px 0 28px;text-align:center;}
@@ -170,54 +179,68 @@ body{
 </head>
 <body>
 
-<div class="hero">
-  <div class="container">
-    <h2><i class="fa-solid fa-calendar-days me-2"></i>活動課程看板</h2>
-    <p>最新課程資訊即時更新</p>
-  </div>
-</div>
+<!-- 用一個明確的容器包所有內容，方便量測 -->
+<div id="measure-wrapper">
 
-<div class="container mb-5">
-  <div class="console-panel">
-    <div class="row g-3">
-      <div class="col-lg-4">
-        <label class="chip-group-label">關鍵字搜尋</label>
-        <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋主題、講師...">
-      </div>
-      <div class="col-lg-4 col-6">
-        <label class="chip-group-label">日期（自）</label>
-        <input type="date" id="dateStart" class="form-control border-2">
-      </div>
-      <div class="col-lg-4 col-6">
-        <label class="chip-group-label">日期（至）</label>
-        <input type="date" id="dateEnd" class="form-control border-2">
-      </div>
-      <div class="col-12 mt-3 mb-2">
-        <label class="chip-group-label"><i class="fa fa-filter me-1"></i>活動屬性篩選</label>
-        <div id="attrChips" class="chip-container"></div>
-      </div>
-      <div class="col-12">
-        <label class="chip-group-label"><i class="fa fa-tags me-1"></i>活動分類篩選</label>
-        <div id="catChips" class="chip-container"></div>
-      </div>
-    </div>
-
-    <div class="control-bar">
-      <div id="status-bar" class="fw-bold text-dark"></div>
-      <div class="control-right">
-        <label class="switch-box m-0">
-          <input class="form-check-input mt-0" type="checkbox" id="showExpired">
-          <span>顯示已結束</span>
-        </label>
-        <a href="#" class="btn-clear" id="btnClear">重置</a>
-      </div>
+  <div class="hero">
+    <div class="container">
+      <h2><i class="fa-solid fa-calendar-days me-2"></i>活動課程看板</h2>
+      <p>最新課程資訊即時更新</p>
     </div>
   </div>
 
-  <div id="listView" class="mt-4"></div>
-  <div id="cardView" class="row g-3 mt-3"></div>
-</div>
+  <div class="container mb-5">
+    <div class="console-panel">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <label class="chip-group-label">關鍵字搜尋</label>
+          <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋主題、講師...">
+        </div>
+        <div class="col-lg-4 col-6">
+          <label class="chip-group-label">日期（自）</label>
+          <input type="date" id="dateStart" class="form-control border-2">
+        </div>
+        <div class="col-lg-4 col-6">
+          <label class="chip-group-label">日期（至）</label>
+          <input type="date" id="dateEnd" class="form-control border-2">
+        </div>
+        <div class="col-12 mt-3 mb-2">
+          <label class="chip-group-label"><i class="fa fa-filter me-1"></i>活動屬性篩選</label>
+          <div id="attrChips" class="chip-container"></div>
+        </div>
+        <div class="col-12">
+          <label class="chip-group-label"><i class="fa fa-tags me-1"></i>活動分類篩選</label>
+          <div id="catChips" class="chip-container"></div>
+        </div>
+      </div>
 
+      <div class="control-bar">
+        <div id="status-bar" class="fw-bold text-dark"></div>
+        <div class="control-right">
+          <label class="switch-box m-0">
+            <input class="form-check-input mt-0" type="checkbox" id="showExpired">
+            <span>顯示已結束</span>
+          </label>
+          <a href="#" class="btn-clear" id="btnClear">重置</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="listView" class="mt-4"></div>
+    <div id="cardView" class="row g-3 mt-3"></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div id="footer-org-name" style="font-weight:600;"></div>
+      <div class="small-muted" id="footer-contact"></div>
+    </div>
+  </footer>
+
+</div>
+<!-- /measure-wrapper -->
+
+<!-- Modal 放在 measure-wrapper 外面，避免影響高度測量 -->
 <div class="modal fade" id="infoModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius:24px;">
@@ -229,13 +252,6 @@ body{
     </div>
   </div>
 </div>
-
-<footer class="site-footer">
-  <div class="container">
-    <div id="footer-org-name" style="font-weight:600;"></div>
-    <div class="small-muted" id="footer-contact"></div>
-  </div>
-</footer>
 
 <script>
 /* ============================================================
@@ -308,16 +324,26 @@ function fmtCalDate(dateStr, timeStr) {
   return yyyy + mm + dd + "T" + hh + min + "00";
 }
 
-/* ===== 高度通知（送給 wrapper 父層）===== */
+/* ====================================================================
+   高度通知（防止無限長高的關鍵）
+   ==================================================================== */
 let lastSentHeight = 0;
+let heightNotifyTimer = null;
+
+function getActualContentHeight() {
+  // 用 measure-wrapper 的 getBoundingClientRect().bottom 來測量「實際內容底部」
+  // 這個值不會因為 iframe 容器變大而變大
+  const wrapper = document.getElementById("measure-wrapper");
+  if (!wrapper) return 0;
+  const rect = wrapper.getBoundingClientRect();
+  return Math.ceil(rect.bottom);
+}
+
 function notifyHeight() {
-  const h = Math.max(
-    document.body.scrollHeight,
-    document.documentElement.scrollHeight,
-    document.body.offsetHeight,
-    document.documentElement.offsetHeight
-  );
-  if (Math.abs(h - lastSentHeight) < 5) return; // 高度差 < 5px 就不發
+  const h = getActualContentHeight();
+  // 只在高度有「明顯變化」時通知（差距 > 10px）
+  if (Math.abs(h - lastSentHeight) < 10) return;
+  if (h < 100) return; // 太小不發
   lastSentHeight = h;
   try {
     window.parent.postMessage({
@@ -325,6 +351,12 @@ function notifyHeight() {
       height: h
     }, "*");
   } catch(e) {}
+}
+
+/* 用節流方式呼叫，避免短時間內重複發送 */
+function scheduleNotify() {
+  if (heightNotifyTimer) clearTimeout(heightNotifyTimer);
+  heightNotifyTimer = setTimeout(notifyHeight, 100);
 }
 
 function init() {
@@ -349,7 +381,7 @@ function init() {
       const errHtml = '<div class="text-center py-5 text-muted"><i class="fa-solid fa-circle-exclamation fa-2x mb-3"></i><br>無法讀取資料，請確認 CSV 網址是否正確且已公開發布。</div>';
       document.getElementById("listView").innerHTML = errHtml;
       document.getElementById("cardView").innerHTML = '<div class="col-12">' + errHtml + '</div>';
-      notifyHeight();
+      scheduleNotify();
     }
   });
 
@@ -368,24 +400,22 @@ function init() {
     setupFilters(); render();
   };
 
+  /* 視窗大小變更時重新測量 */
   window.addEventListener("resize", () => {
     render();
-    notifyHeight();
+    scheduleNotify();
   });
 
-  /* 觀察 body 大小變化，主動通知父層 */
+  /* 觀察 measure-wrapper（不是 body）的大小變化 */
   if (window.ResizeObserver) {
-    new ResizeObserver(notifyHeight).observe(document.body);
+    const wrapper = document.getElementById("measure-wrapper");
+    if (wrapper) {
+      new ResizeObserver(scheduleNotify).observe(wrapper);
+    }
   }
-  /* Modal 開關時也要通知 */
-  document.getElementById("infoModal").addEventListener("shown.bs.modal", notifyHeight);
-  document.getElementById("infoModal").addEventListener("hidden.bs.modal", notifyHeight);
 
-  /* 持續通知（保險），每 1 秒檢查一次 */
-  setInterval(notifyHeight, 1000);
-
-  /* 載入完立即通知 */
-  window.addEventListener("load", notifyHeight);
+  /* 載入完立即通知一次 */
+  window.addEventListener("load", scheduleNotify);
 }
 
 function setupFilters() {
@@ -518,7 +548,7 @@ function render() {
     el.addEventListener("click", () => showDetail(parseInt(el.getAttribute("data-idx"))));
   });
 
-  notifyHeight();
+  scheduleNotify();
 }
 
 function showDetail(i) {
