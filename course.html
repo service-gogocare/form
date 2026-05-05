@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動課程看板</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+:root{
+  --primary:#1d4ed8;
+  --accent:#2563eb;
+  --bg:#f8fafc;
+  --text:#1e293b;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --gold:#f59e0b;
+  --danger:#dc2626;
+  --btn-dark:#1e3a8a;
+}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  color:var(--text);
+}
+
+.hero{background:#fff;border-bottom:3px solid var(--accent);padding:36px 0 28px;text-align:center;}
+.hero h2{font-weight:700;color:var(--btn-dark);margin:0;font-size:1.75rem;}
+.hero p{color:var(--muted);margin:6px 0 0;}
+
+.console-panel{
+  background:#fff;border-radius:22px;padding:22px;
+  box-shadow:0 10px 30px rgba(29,78,216,.08);
+  border:1px solid var(--line);margin-top:-30px;
+}
+.chip-group-label{font-size:1rem;font-weight:700;color:var(--btn-dark);margin-bottom:10px;display:block;}
+.chip-container{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  padding:8px 14px;border-radius:50px;background:#f1f5f9;
+  border:2px solid var(--line);font-size:.92rem;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:.2s;
+}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chip-attr.active{background:var(--btn-dark);color:#fff;border-color:var(--btn-dark);}
+
+.pin-badge{
+  background:var(--gold);color:#fff;padding:3px 10px;border-radius:999px;
+  font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;
+}
+.tag-badge,.attr-pill{
+  color:#fff;padding:5px 11px;border-radius:999px;font-size:.85rem;font-weight:700;
+  line-height:1;display:inline-flex;align-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.tag-badge{border:2px solid rgba(255,255,255,.78);}
+
+.list-item{
+  background:#fff;border-radius:18px;padding:20px;
+  border:2px solid var(--line);margin-bottom:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  transition:.2s;
+}
+.list-item.is-pinned{border-color:var(--gold);background:#fffbeb;}
+.list-item.is-past{opacity:.55;filter:grayscale(.5);}
+.list-item:hover{border-color:var(--accent);transform:translateX(4px);}
+.list-main{flex-grow:1;min-width:0;}
+.list-title{font-size:1.18rem;font-weight:700;color:var(--btn-dark);margin:8px 0;line-height:1.5;}
+.list-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:.92rem;color:var(--muted);font-weight:500;}
+.list-meta i{color:var(--accent);margin-right:4px;}
+.list-price{
+  min-width:130px;text-align:right;
+  font-size:1.4rem;font-weight:700;color:var(--danger);white-space:nowrap;
+}
+
+.event-card{
+  background:#fff;border-radius:20px;border:2px solid var(--line);
+  cursor:pointer;height:100%;transition:.25s;
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+}
+.event-card::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:5px;
+  background:linear-gradient(90deg,var(--primary),#06b6d4,#7c3aed);
+}
+.event-card.is-pinned{border-color:var(--gold);}
+.event-card.is-past{opacity:.55;filter:grayscale(.6);}
+.event-title{font-size:1.18rem;font-weight:700;color:var(--btn-dark);margin-bottom:10px;line-height:1.5;}
+.info-text-unified{font-size:.92rem;font-weight:500;line-height:1.7;color:var(--muted);}
+.instructor-tag{color:var(--accent);font-size:1rem;font-weight:600;margin-bottom:8px;}
+.time-border{border-left:4px solid var(--accent);padding-left:12px;margin:12px 0;}
+
+.control-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);
+}
+.control-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.switch-box{
+  background:#f1f5f9;border:2px solid var(--line);
+  padding:6px 14px;border-radius:50px;
+  display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;font-size:.9rem;
+}
+.btn-clear{
+  background-color:var(--btn-dark);color:#fff;border:none;
+  font-weight:600;padding:8px 22px;border-radius:50px;cursor:pointer;
+  text-decoration:none;display:inline-block;
+}
+.btn-clear:hover{color:#fff;}
+
+.poster-card{background:#fff;border-radius:24px;overflow:hidden;}
+.poster-top{
+  background:linear-gradient(135deg,#f8fafc 0%,#eff6ff 100%);
+  padding:14px 26px 18px;border-bottom:1px solid var(--line);
+}
+.poster-org{font-size:1rem;font-weight:800;color:var(--btn-dark);margin-bottom:8px;}
+.poster-category-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.poster-title{font-size:1.6rem;line-height:1.4;font-weight:700;color:var(--btn-dark);margin:0;word-break:break-word;}
+.poster-body{padding:18px 26px 24px;}
+.poster-layout{display:grid;grid-template-columns:minmax(0,1.4fr) 200px;gap:18px;align-items:start;}
+.poster-main{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.poster-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.poster-info-item{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:11px 13px;}
+.poster-info-item.full{grid-column:1/-1;}
+.poster-info-label{font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:5px;}
+.poster-info-value{font-size:.95rem;line-height:1.6;word-break:break-word;white-space:pre-wrap;}
+.poster-price{color:var(--danger);font-weight:700;}
+.poster-section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;}
+.poster-section-title{font-size:.95rem;font-weight:700;color:var(--btn-dark);margin-bottom:6px;}
+.poster-section-text{font-size:.95rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+.poster-side{background:#eff6ff;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;}
+.poster-side-title{font-size:.92rem;font-weight:700;color:var(--btn-dark);margin-bottom:8px;}
+.poster-qr-box{
+  width:140px;height:140px;background:#fff;
+  border:1px solid var(--line);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 8px;padding:6px;
+}
+.poster-link{font-size:.78rem;line-height:1.5;color:var(--muted);word-break:break-all;}
+.btn-cal-mini{
+  background:var(--accent);color:#fff;border:none;
+  padding:9px 14px;border-radius:10px;
+  font-size:.95rem;font-weight:600;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-cal-mini:hover{background:var(--btn-dark);color:#fff;}
+
+.site-footer{
+  background:#fff;border-top:3px solid var(--accent);
+  padding:20px 0;color:var(--muted);text-align:center;margin-top:36px;
+}
+.site-footer .small-muted{font-weight:500;color:#94a3b8;margin-top:4px;font-size:.88rem;}
+
+#listView{display:block;}
+#cardView{display:none;}
+@media (max-width:768px){
+  #listView{display:none;}
+  #cardView{display:flex;flex-wrap:wrap;}
+  .control-bar{flex-direction:column;text-align:center;}
+  .control-right{justify-content:center;width:100%;}
+  .poster-layout{grid-template-columns:1fr;}
+  .poster-side{max-width:280px;margin:0 auto;}
+  .poster-info-grid{grid-template-columns:1fr;}
+  .poster-title{font-size:1.35rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <h2><i class="fa-solid fa-calendar-days me-2"></i>活動課程看板</h2>
+    <p>最新課程資訊即時更新</p>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="console-panel">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <label class="chip-group-label">關鍵字搜尋</label>
+        <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋主題、講師...">
+      </div>
+      <div class="col-lg-4 col-6">
+        <label class="chip-group-label">日期（自）</label>
+        <input type="date" id="dateStart" class="form-control border-2">
+      </div>
+      <div class="col-lg-4 col-6">
+        <label class="chip-group-label">日期（至）</label>
+        <input type="date" id="dateEnd" class="form-control border-2">
+      </div>
+      <div class="col-12 mt-3 mb-2">
+        <label class="chip-group-label"><i class="fa fa-filter me-1"></i>活動屬性篩選</label>
+        <div id="attrChips" class="chip-container"></div>
+      </div>
+      <div class="col-12">
+        <label class="chip-group-label"><i class="fa fa-tags me-1"></i>活動分類篩選</label>
+        <div id="catChips" class="chip-container"></div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <div id="status-bar" class="fw-bold text-dark"></div>
+      <div class="control-right">
+        <label class="switch-box m-0">
+          <input class="form-check-input mt-0" type="checkbox" id="showExpired">
+          <span>顯示已結束</span>
+        </label>
+        <a href="#" class="btn-clear" id="btnClear">重置</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="listView" class="mt-4"></div>
+  <div id="cardView" class="row g-3 mt-3"></div>
+</div>
+
+<div class="modal fade" id="infoModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:24px;">
+      <div class="modal-header border-0 pb-0">
+        <a href="#" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+      </div>
+      <div id="m-body" class="modal-body p-4 pt-0"></div>
+      <div class="modal-footer border-0 p-4 pt-2 d-flex flex-wrap gap-2" id="modal-footer-btns"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div id="footer-org-name" style="font-weight:600;"></div>
+    <div class="small-muted" id="footer-contact"></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   ★★★ 設定區（請修改下方 4 個變數）★★★
+   ============================================================ */
+const ORG_NAME = "GOGOCARE";
+const FOOTER_COPYRIGHT = "© 2026 GOGOCARE All Rights Reserved";
+const FOOTER_CONTACT = "聯絡我們：service@example.com";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDf1yb-PiBzSRzr7w403HG89htbeOLmm7LRoPSViNE-4YX5L6Y96o-w0si5l22hmFntkxQ9B3VUWJA/pub?output=csv";
+/* ============================================================ */
+
+document.getElementById("footer-org-name").textContent = FOOTER_COPYRIGHT;
+document.getElementById("footer-contact").textContent = FOOTER_CONTACT;
+
+let db = [], selectedCats = [], selectedAttrs = [];
+let lastUpdateTime = "";
+const modal = new bootstrap.Modal(document.getElementById("infoModal"));
+
+function escHtml(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function getColor(text) {
+  const colors = ["#1d4ed8","#0891b2","#7c3aed","#db2777","#059669","#d97706","#dc2626","#0f766e"];
+  let h = 0;
+  const s = String(text||"");
+  for (let i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+}
+
+function buildTags(raw) {
+  if (!raw) return "";
+  return raw.split(/[，,]/).map(c => {
+    const label = c.trim();
+    return '<span class="tag-badge" style="background:' + getColor(label) + ';">' + escHtml(label) + '</span>';
+  }).join("");
+}
+
+function buildAttrPill(text) {
+  if (!text) return "";
+  return '<span class="attr-pill" style="background:' + getColor(text) + ';">' + escHtml(text) + '</span>';
+}
+
+function isExpired(d) {
+  const endDay = d["活動結束日期"] || d["活動開始日期"];
+  const endTime = d["活動結束時間"] || "23:59";
+  return new Date() > new Date(endDay + " " + endTime);
+}
+
+function priceText(v) {
+  const raw = String(v == null ? "" : v).trim().replace(/,/g,"");
+  if (!raw) return "免費";
+  if (/^0+(\.0+)?$/.test(raw)) return "免費";
+  if (/^\d+$/.test(raw)) return "NT$" + Number(raw).toLocaleString();
+  return raw;
+}
+
+function fmtCalDate(dateStr, timeStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  let hh = "00", min = "00";
+  if (timeStr) {
+    const m = timeStr.match(/(\d{1,2})[:：](\d{1,2})/);
+    if (m) { hh = m[1].padStart(2,"0"); min = m[2].padStart(2,"0"); }
+  }
+  return yyyy + mm + dd + "T" + hh + min + "00";
+}
+
+/* ===== 高度通知（送給 wrapper 父層）===== */
+let lastSentHeight = 0;
+function notifyHeight() {
+  const h = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    document.body.offsetHeight,
+    document.documentElement.offsetHeight
+  );
+  if (Math.abs(h - lastSentHeight) < 5) return; // 高度差 < 5px 就不發
+  lastSentHeight = h;
+  try {
+    window.parent.postMessage({
+      type: "EVENT_BOARD_RESIZE",
+      height: h
+    }, "*");
+  } catch(e) {}
+}
+
+function init() {
+  const now = new Date();
+  lastUpdateTime = now.getFullYear() + "/" + String(now.getMonth()+1).padStart(2,"0") + "/" + String(now.getDate()).padStart(2,"0") + " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete(res) {
+      db = res.data.map(row => {
+        const clean = {};
+        Object.keys(row).forEach(k => clean[k.trim()] = row[k] ? row[k].trim() : "");
+        clean._status = row[Object.keys(row)[0]] || "";
+        return clean;
+      }).filter(r => r["活動主題"]);
+      setupFilters();
+      render();
+    },
+    error() {
+      const errHtml = '<div class="text-center py-5 text-muted"><i class="fa-solid fa-circle-exclamation fa-2x mb-3"></i><br>無法讀取資料，請確認 CSV 網址是否正確且已公開發布。</div>';
+      document.getElementById("listView").innerHTML = errHtml;
+      document.getElementById("cardView").innerHTML = '<div class="col-12">' + errHtml + '</div>';
+      notifyHeight();
+    }
+  });
+
+  ["searchInp","dateStart","dateEnd","showExpired"].forEach(id => {
+    document.getElementById(id).onchange = render;
+    if (id === "searchInp") document.getElementById(id).oninput = render;
+  });
+
+  document.getElementById("btnClear").onclick = (e) => {
+    e.preventDefault();
+    document.getElementById("searchInp").value = "";
+    document.getElementById("dateStart").value = "";
+    document.getElementById("dateEnd").value = "";
+    document.getElementById("showExpired").checked = false;
+    selectedCats = []; selectedAttrs = [];
+    setupFilters(); render();
+  };
+
+  window.addEventListener("resize", () => {
+    render();
+    notifyHeight();
+  });
+
+  /* 觀察 body 大小變化，主動通知父層 */
+  if (window.ResizeObserver) {
+    new ResizeObserver(notifyHeight).observe(document.body);
+  }
+  /* Modal 開關時也要通知 */
+  document.getElementById("infoModal").addEventListener("shown.bs.modal", notifyHeight);
+  document.getElementById("infoModal").addEventListener("hidden.bs.modal", notifyHeight);
+
+  /* 持續通知（保險），每 1 秒檢查一次 */
+  setInterval(notifyHeight, 1000);
+
+  /* 載入完立即通知 */
+  window.addEventListener("load", notifyHeight);
+}
+
+function setupFilters() {
+  const cats = new Set(), attrs = new Set();
+  db.forEach(d => {
+    if (d._status.includes("隱藏")) return;
+    if (d["活動分類"]) d["活動分類"].split(/[，,]/).forEach(c => cats.add(c.trim()));
+    if (d["活動屬性"]) attrs.add(d["活動屬性"].trim());
+  });
+
+  document.getElementById("catChips").innerHTML = Array.from(cats).sort().map(v =>
+    '<div class="chip ' + (selectedCats.includes(v)?"active":"") + '" data-type="cat" data-val="' + escHtml(v) + '">' + escHtml(v) + '</div>'
+  ).join("");
+
+  document.getElementById("attrChips").innerHTML = Array.from(attrs).sort().map(v =>
+    '<div class="chip chip-attr ' + (selectedAttrs.includes(v)?"active":"") + '" data-type="attr" data-val="' + escHtml(v) + '">' + escHtml(v) + '</div>'
+  ).join("");
+
+  document.querySelectorAll(".chip").forEach(el => {
+    el.onclick = () => {
+      const type = el.getAttribute("data-type");
+      const val = el.getAttribute("data-val");
+      const arr = (type === "cat") ? selectedCats : selectedAttrs;
+      const i = arr.indexOf(val);
+      if (i > -1) arr.splice(i,1); else arr.push(val);
+      el.classList.toggle("active");
+      render();
+    };
+  });
+}
+
+function render() {
+  const key = document.getElementById("searchInp").value.toLowerCase();
+  const showExp = document.getElementById("showExpired").checked;
+  const ds = document.getElementById("dateStart").value ? new Date(document.getElementById("dateStart").value).getTime() : null;
+  const de = document.getElementById("dateEnd").value ? new Date(document.getElementById("dateEnd").value).getTime() : null;
+
+  let list = db.filter(d => {
+    if (d._status.includes("隱藏")) return false;
+    const past = isExpired(d);
+    if (!showExp && past) return false;
+    const matchK = (d["活動主題"]||"").toLowerCase().includes(key) || (d["活動講師"]||"").toLowerCase().includes(key);
+    if (!matchK) return false;
+    const dCats = d["活動分類"] ? d["活動分類"].split(/[，,]/).map(x => x.trim()) : [];
+    if (selectedCats.length && !dCats.some(c => selectedCats.includes(c))) return false;
+    if (selectedAttrs.length && !selectedAttrs.includes(d["活動屬性"])) return false;
+    const sd = new Date(d["活動開始日期"]).getTime();
+    const ed = new Date(d["活動結束日期"] || d["活動開始日期"]).getTime();
+    if (ds && ed < ds) return false;
+    if (de && sd > de) return false;
+    return true;
+  });
+
+  list.sort((a,b) => {
+    const ap = a._status.includes("置頂") ? 1 : 0;
+    const bp = b._status.includes("置頂") ? 1 : 0;
+    if (ap !== bp) return bp - ap;
+    const ae = isExpired(a), be = isExpired(b);
+    if (ae !== be) return ae - be;
+    const da = new Date(a["活動開始日期"]);
+    const db_ = new Date(b["活動開始日期"]);
+    return ae ? db_ - da : da - db_;
+  });
+
+  document.getElementById("status-bar").innerHTML =
+    '<span class="text-muted me-3">最後更新：' + lastUpdateTime + '</span> 找到 ' + list.length + ' 個活動';
+
+  document.getElementById("listView").innerHTML = list.map(d => {
+    const idx = db.indexOf(d);
+    const isPinned = d._status.includes("置頂");
+    const past = isExpired(d);
+    const price = priceText(d["價格"]);
+    const tags = buildTags(d["活動分類"]);
+    const attrPill = buildAttrPill(d["活動屬性"]);
+    const startD = d["活動開始日期"];
+    const endD = d["活動結束日期"] || startD;
+    const dateStr = startD === endD ? startD : (startD + " 至 " + endD);
+    const timeStr = (d["活動開始時間"]||"") + (d["活動結束時間"] ? " ~ "+d["活動結束時間"] : "");
+    const pinHtml = isPinned ? '<span class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂</span>' : '';
+
+    return '<div class="list-item ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '" data-idx="' + idx + '">' +
+      '<div class="list-main">' +
+        '<div class="d-flex flex-wrap gap-2 align-items-center">' + pinHtml + tags + attrPill + '</div>' +
+        '<div class="list-title">' + escHtml(d["活動主題"]||"") + '</div>' +
+        '<div class="list-meta">' +
+          '<div><i class="fa fa-user-tie"></i>' + escHtml(d["活動講師"]||"—") + '</div>' +
+          '<div><i class="fa-regular fa-calendar"></i>' + escHtml(dateStr) + '</div>' +
+          '<div><i class="fa-regular fa-clock"></i>' + escHtml(timeStr||"—") + '</div>' +
+          '<div><i class="fa fa-location-dot"></i>' + escHtml(d["活動地點"]||"—") + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="list-price">' + escHtml(price) + '</div>' +
+    '</div>';
+  }).join("") || '<div class="text-center py-5 text-muted">沒有符合條件的活動</div>';
+
+  document.getElementById("cardView").innerHTML = list.map(d => {
+    const idx = db.indexOf(d);
+    const isPinned = d._status.includes("置頂");
+    const past = isExpired(d);
+    const price = priceText(d["價格"]);
+    const tags = buildTags(d["活動分類"]);
+    const attrPill = buildAttrPill(d["活動屬性"]);
+    const startD = d["活動開始日期"];
+    const endD = d["活動結束日期"] || startD;
+    const startT = d["活動開始時間"];
+    const endT = d["活動結束時間"];
+    const timeInfo = (startD === endD)
+      ? '<div class="info-text-unified"><i class="fa fa-calendar-alt me-2 text-muted"></i>' + escHtml(startD) + '</div>' +
+        '<div class="info-text-unified small" style="opacity:.86"><i class="fa fa-clock me-2 text-muted"></i>' + escHtml(startT) + ' ~ ' + escHtml(endT) + '</div>'
+      : '<div class="info-text-unified small"><i class="fa fa-calendar-check me-2 text-muted"></i>' + escHtml(startD) + '</div>' +
+        '<div class="info-text-unified small" style="opacity:.86"><i class="fa fa-calendar-times me-2 text-muted"></i>' + escHtml(endD) + '</div>';
+    const pinHtml = isPinned ? '<div class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂推薦</div>' : '';
+
+    return '<div class="col-12">' +
+      '<div class="event-card p-4 ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '" data-idx="' + idx + '">' +
+        pinHtml +
+        '<div class="mb-2 d-flex flex-wrap gap-2">' + tags + '</div>' +
+        '<div class="event-title">' + escHtml(d["活動主題"]||"") + '</div>' +
+        '<div class="instructor-tag"><i class="fa fa-user-tie me-2"></i>' + escHtml(d["活動講師"]||"") + '</div>' +
+        '<div class="time-border">' + timeInfo + '</div>' +
+        '<div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">' +
+          attrPill +
+          '<span class="fs-4" style="font-weight:700;color:var(--danger);">' + escHtml(price) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join("") || '<div class="col-12 text-center py-5 text-muted">沒有符合條件的活動</div>';
+
+  document.querySelectorAll("[data-idx]").forEach(el => {
+    el.addEventListener("click", () => showDetail(parseInt(el.getAttribute("data-idx"))));
+  });
+
+  notifyHeight();
+}
+
+function showDetail(i) {
+  const d = db[i];
+  if (!d) return;
+  const applyLink = d["報名連結"] || "";
+  const price = priceText(d["價格"]);
+  const tags = buildTags(d["活動分類"]);
+  const attrPill = buildAttrPill(d["活動屬性"]);
+  const startD = d["活動開始日期"] || "";
+  const endD = d["活動結束日期"] || startD;
+  const dateText = startD === endD ? startD : (startD + " 至 " + endD);
+  const timeText = (d["活動開始時間"]||"") + (d["活動結束時間"] ? " - "+d["活動結束時間"] : "");
+  const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
+  const calEnd = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
+  const calUrl = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
+
+  let body = '<div class="poster-card">' +
+    '<div class="poster-top">' +
+      '<div class="poster-org">' + escHtml(ORG_NAME) + '</div>' +
+      '<div class="poster-category-row">' + tags + ' ' + attrPill + '</div>' +
+      '<div class="poster-title">' + escHtml(d["活動主題"]||"") + '</div>' +
+    '</div>' +
+    '<div class="poster-body">' +
+      '<div class="poster-layout">' +
+        '<div class="poster-main">' +
+          '<div class="poster-info-grid">' +
+            '<div class="poster-info-item"><div class="poster-info-label">講師</div><div class="poster-info-value">' + escHtml(d["活動講師"]||"詳見課程資訊") + '</div></div>' +
+            '<div class="poster-info-item"><div class="poster-info-label">費用</div><div class="poster-info-value poster-price">' + escHtml(price) + '</div></div>' +
+            '<div class="poster-info-item"><div class="poster-info-label">日期</div><div class="poster-info-value">' + escHtml(dateText) + '</div></div>' +
+            '<div class="poster-info-item"><div class="poster-info-label">時間</div><div class="poster-info-value">' + escHtml(timeText||"詳見課程資訊") + '</div></div>' +
+            '<div class="poster-info-item full"><div class="poster-info-label">地點</div><div class="poster-info-value">' + escHtml(d["活動地點"]||"詳見課程資訊") + '</div></div>' +
+          '</div>';
+
+  if (d["活動簡介"]) {
+    body += '<div class="poster-section"><div class="poster-section-title">課程簡介</div><div class="poster-section-text">' + escHtml(d["活動簡介"]) + '</div></div>';
+  }
+
+  body += '<div><a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i>加到 Google 行事曆</a></div>' +
+        '</div>' +
+        '<div class="poster-side">' +
+          '<div class="poster-side-title">報名 QR Code</div>' +
+          '<div class="poster-qr-box" id="poster-qrcode"></div>' +
+          '<div class="poster-link">' + (applyLink ? escHtml(applyLink) : "尚未提供報名連結") + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  document.getElementById("m-body").innerHTML = body;
+
+  document.getElementById("modal-footer-btns").innerHTML = applyLink.toLowerCase().startsWith("http")
+    ? '<a href="' + escHtml(applyLink) + '" class="btn btn-primary flex-grow-1 py-3" target="_blank" rel="noopener" style="background:var(--primary);border:none;font-weight:600;">立即報名</a>'
+    : '<div class="btn btn-secondary flex-grow-1 py-3" style="font-weight:600;">尚未開放</div>';
+
+  modal.show();
+
+  setTimeout(() => {
+    const qrBox = document.getElementById("poster-qrcode");
+    if (qrBox) {
+      qrBox.innerHTML = "";
+      if (applyLink && /^https?:\/\//i.test(applyLink)) {
+        new QRCode(qrBox, { text: applyLink, width: 128, height: 128 });
+      } else {
+        qrBox.innerHTML = '<div class="text-muted small">尚未提供連結</div>';
+      }
+    }
+  }, 150);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
