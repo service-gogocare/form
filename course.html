@@ -70,7 +70,7 @@ body{
 
 .list-item{
   background:#fff;border-radius:8px;padding:14px 18px;
-  border:1px solid var(--line);margin-bottom:10px;cursor:pointer;
+  border:1px solid var(--line);margin-bottom:10px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   transition:.18s;
 }
@@ -88,7 +88,7 @@ body{
 
 .event-card{
   background:#fff;border-radius:8px;border:1px solid var(--line);
-  cursor:pointer;height:100%;transition:.18s;
+  height:100%;transition:.18s;
   display:flex;flex-direction:column;position:relative;overflow:hidden;
 }
 .event-card::before{
@@ -120,42 +120,40 @@ body{
 }
 .btn-clear:hover{background-color:var(--btn-dark);color:#fff;}
 
-.poster-card{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
-.poster-top{
-  background:linear-gradient(135deg,#f5f6f7 0%,#e8f4fb 100%);
-  padding:14px 22px 16px;border-bottom:1px solid var(--line);
-}
-.poster-org{font-size:.9rem;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:.04em;}
-.poster-category-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.poster-title{font-size:1.4rem;line-height:1.4;font-weight:700;color:var(--btn-dark);margin:0;word-break:break-word;}
-.poster-body{padding:16px 22px 20px;}
-.poster-layout{display:grid;grid-template-columns:minmax(0,1.4fr) 190px;gap:16px;align-items:start;}
-.poster-main{display:flex;flex-direction:column;gap:12px;min-width:0;}
-.poster-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-.poster-info-item{background:#f5f6f7;border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
-.poster-info-item.full{grid-column:1/-1;}
-.poster-info-label{font-size:.76rem;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
-.poster-info-value{font-size:.93rem;line-height:1.6;word-break:break-word;white-space:pre-wrap;color:var(--text);}
-.poster-price{color:var(--danger);font-weight:700;}
-.poster-section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;}
-.poster-section-title{font-size:.9rem;font-weight:700;color:var(--btn-dark);margin-bottom:5px;}
-.poster-section-text{font-size:.93rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--text);}
-.poster-side{background:#e8f4fb;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;}
-.poster-side-title{font-size:.88rem;font-weight:700;color:var(--btn-dark);margin-bottom:8px;}
-.poster-qr-box{
-  width:136px;height:136px;background:#fff;
-  border:1px solid var(--line);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 8px;padding:6px;
-}
-.poster-link{font-size:.76rem;line-height:1.5;color:var(--muted);word-break:break-all;}
+/* 「加到 Google 行事曆」按鈕（藍底白字） */
 .btn-cal-mini{
   background:var(--accent);color:#fff;border:none;
-  padding:8px 14px;border-radius:6px;
-  font-size:.9rem;font-weight:600;text-decoration:none;
-  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:6px;
+  font-size:.84rem;font-weight:600;text-decoration:none;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
 }
 .btn-cal-mini:hover{background:var(--btn-dark);color:#fff;}
+
+/* 「立即報名」按鈕（深色填充） */
+.btn-apply{
+  background:var(--btn-dark);color:#fff;border:none;
+  padding:6px 12px;border-radius:6px;
+  font-size:.84rem;font-weight:600;text-decoration:none;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.btn-apply:hover{background:#000;color:#fff;}
+
+/* 「尚未開放」（灰色禁用狀態） */
+.btn-apply-disabled{
+  background:#e5e7e7;color:var(--muted);
+  padding:6px 12px;border-radius:6px;
+  font-size:.84rem;font-weight:600;
+  display:inline-flex;align-items:center;cursor:default;white-space:nowrap;
+}
+
+/* 清單列右側欄：價格 + 按鈕群（垂直排列） */
+.list-right{
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:8px;min-width:150px;flex-shrink:0;
+}
+
+/* 卡片底部按鈕行 */
+.card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 
 #listView{display:block;}
 #cardView{display:none;}
@@ -164,10 +162,8 @@ body{
   #cardView{display:flex;flex-wrap:wrap;}
   .control-bar{flex-direction:column;text-align:center;}
   .control-right{justify-content:center;width:100%;}
-  .poster-layout{grid-template-columns:1fr;}
-  .poster-side{max-width:280px;margin:0 auto;}
-  .poster-info-grid{grid-template-columns:1fr;}
-  .poster-title{font-size:1.35rem;}
+  /* 手機清單列：右側改為橫排 */
+  .list-right{flex-direction:row;align-items:center;flex-wrap:wrap;min-width:unset;}
 }
 </style>
 </head>
@@ -221,18 +217,7 @@ body{
 </div>
 <!-- /measure-wrapper -->
 
-<!-- Modal 放在 measure-wrapper 外面，避免影響高度測量 -->
-<div class="modal fade" id="infoModal" tabindex="-1">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius:24px;">
-      <div class="modal-header border-0 pb-0">
-        <a href="#" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
-      </div>
-      <div id="m-body" class="modal-body p-4 pt-0"></div>
-      <div class="modal-footer border-0 p-4 pt-2 d-flex flex-wrap gap-2" id="modal-footer-btns"></div>
-    </div>
-  </div>
-</div>
+<!-- Modal 已移除：行事曆按鈕與報名按鈕直接嵌入卡片與清單列 -->
 
 <script>
 /* ============================================================
@@ -246,7 +231,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDf1yb-PiBzSRz
 
 let db = [], selectedCats = [], selectedAttrs = [];
 let lastUpdateTime = "";
-const modal = new bootstrap.Modal(document.getElementById("infoModal"));
+/* Modal 已移除 */
 
 function escHtml(s) {
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -461,8 +446,9 @@ function render() {
   document.getElementById("status-bar").innerHTML =
     '<span class="text-muted me-3">最後更新：' + lastUpdateTime + '</span> 找到 ' + list.length + ' 個活動';
 
+  /* ── 桌機清單視圖（listView）──
+     右側：價格 + 「加到行事曆」+ 「立即報名/尚未開放」*/
   document.getElementById("listView").innerHTML = list.map(d => {
-    const idx = db.indexOf(d);
     const isPinned = d._status.includes("置頂");
     const past = isExpired(d);
     const price = priceText(d["價格"]);
@@ -473,8 +459,17 @@ function render() {
     const dateStr = startD === endD ? startD : (startD + " 至 " + endD);
     const timeStr = (d["活動開始時間"]||"") + (d["活動結束時間"] ? " ~ "+d["活動結束時間"] : "");
     const pinHtml = isPinned ? '<span class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂</span>' : '';
+    const applyLink = d["報名連結"] || "";
+    /* Google Calendar URL */
+    const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
+    const calEnd   = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
+    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
+    /* 報名按鈕：有連結 → 超連結；無連結 → 灰色禁用文字 */
+    const applyBtn = applyLink.toLowerCase().startsWith("http")
+      ? '<a href="' + escHtml(applyLink) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square me-1"></i>立即報名</a>'
+      : '<span class="btn-apply-disabled">尚未開放</span>';
 
-    return '<div class="list-item ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '" data-idx="' + idx + '">' +
+    return '<div class="list-item ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '">' +
       '<div class="list-main">' +
         '<div class="d-flex flex-wrap gap-2 align-items-center">' + pinHtml + tags + attrPill + '</div>' +
         '<div class="list-title">' + escHtml(d["活動主題"]||"") + '</div>' +
@@ -485,12 +480,18 @@ function render() {
           '<div><i class="fa fa-location-dot"></i>' + escHtml(d["活動地點"]||"—") + '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="list-price">' + escHtml(price) + '</div>' +
+      /* 右側欄：價格 + 按鈕群（垂直排列） */
+      '<div class="list-right">' +
+        '<div class="list-price">' + escHtml(price) + '</div>' +
+        '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
+        applyBtn +
+      '</div>' +
     '</div>';
   }).join("") || '<div class="text-center py-5 text-muted">沒有符合條件的活動</div>';
 
+  /* ── 手機卡片視圖（cardView）──
+     底部新增按鈕行：「加到行事曆」+ 「立即報名/尚未開放」*/
   document.getElementById("cardView").innerHTML = list.map(d => {
-    const idx = db.indexOf(d);
     const isPinned = d._status.includes("置頂");
     const past = isExpired(d);
     const price = priceText(d["價格"]);
@@ -506,96 +507,40 @@ function render() {
       : '<div class="info-text-unified small"><i class="fa fa-calendar-check me-2 text-muted"></i>' + escHtml(startD) + '</div>' +
         '<div class="info-text-unified small" style="opacity:.86"><i class="fa fa-calendar-times me-2 text-muted"></i>' + escHtml(endD) + '</div>';
     const pinHtml = isPinned ? '<div class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂推薦</div>' : '';
+    const applyLink = d["報名連結"] || "";
+    /* Google Calendar URL */
+    const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
+    const calEnd   = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
+    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
+    /* 報名按鈕 */
+    const applyBtn = applyLink.toLowerCase().startsWith("http")
+      ? '<a href="' + escHtml(applyLink) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square me-1"></i>立即報名</a>'
+      : '<span class="btn-apply-disabled">尚未開放</span>';
 
     return '<div class="col-12">' +
-      '<div class="event-card p-4 ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '" data-idx="' + idx + '">' +
+      '<div class="event-card p-4 ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '">' +
         pinHtml +
         '<div class="mb-2 d-flex flex-wrap gap-2">' + tags + '</div>' +
         '<div class="event-title">' + escHtml(d["活動主題"]||"") + '</div>' +
         '<div class="instructor-tag"><i class="fa fa-user-tie me-2"></i>' + escHtml(d["活動講師"]||"") + '</div>' +
         '<div class="time-border">' + timeInfo + '</div>' +
+        /* 卡片底部：屬性標籤 + 價格 */
         '<div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">' +
           attrPill +
           '<span class="fs-4" style="font-weight:700;color:var(--danger);">' + escHtml(price) + '</span>' +
+        '</div>' +
+        /* 卡片底部：行事曆 + 報名 按鈕行 */
+        '<div class="card-actions">' +
+          '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
+          applyBtn +
         '</div>' +
       '</div>' +
     '</div>';
   }).join("") || '<div class="col-12 text-center py-5 text-muted">沒有符合條件的活動</div>';
 
-  document.querySelectorAll("[data-idx]").forEach(el => {
-    el.addEventListener("click", () => showDetail(parseInt(el.getAttribute("data-idx"))));
-  });
-
-  scheduleNotify();
+  scheduleNotify(); /* 渲染後通知高度（iframe 用） */
 }
-
-function showDetail(i) {
-  const d = db[i];
-  if (!d) return;
-  const applyLink = d["報名連結"] || "";
-  const price = priceText(d["價格"]);
-  const tags = buildTags(d["活動分類"]);
-  const attrPill = buildAttrPill(d["活動屬性"]);
-  const startD = d["活動開始日期"] || "";
-  const endD = d["活動結束日期"] || startD;
-  const dateText = startD === endD ? startD : (startD + " 至 " + endD);
-  const timeText = (d["活動開始時間"]||"") + (d["活動結束時間"] ? " - "+d["活動結束時間"] : "");
-  const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
-  const calEnd = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
-  const calUrl = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
-
-  let body = '<div class="poster-card">' +
-    '<div class="poster-top">' +
-      '<div class="poster-org">' + escHtml(ORG_NAME) + '</div>' +
-      '<div class="poster-category-row">' + tags + ' ' + attrPill + '</div>' +
-      '<div class="poster-title">' + escHtml(d["活動主題"]||"") + '</div>' +
-    '</div>' +
-    '<div class="poster-body">' +
-      '<div class="poster-layout">' +
-        '<div class="poster-main">' +
-          '<div class="poster-info-grid">' +
-            '<div class="poster-info-item"><div class="poster-info-label">講師</div><div class="poster-info-value">' + escHtml(d["活動講師"]||"詳見課程資訊") + '</div></div>' +
-            '<div class="poster-info-item"><div class="poster-info-label">費用</div><div class="poster-info-value poster-price">' + escHtml(price) + '</div></div>' +
-            '<div class="poster-info-item"><div class="poster-info-label">日期</div><div class="poster-info-value">' + escHtml(dateText) + '</div></div>' +
-            '<div class="poster-info-item"><div class="poster-info-label">時間</div><div class="poster-info-value">' + escHtml(timeText||"詳見課程資訊") + '</div></div>' +
-            '<div class="poster-info-item full"><div class="poster-info-label">地點</div><div class="poster-info-value">' + escHtml(d["活動地點"]||"詳見課程資訊") + '</div></div>' +
-          '</div>';
-
-  if (d["活動簡介"]) {
-    body += '<div class="poster-section"><div class="poster-section-title">課程簡介</div><div class="poster-section-text">' + escHtml(d["活動簡介"]) + '</div></div>';
-  }
-
-  body += '<div><a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i>加到 Google 行事曆</a></div>' +
-        '</div>' +
-        '<div class="poster-side">' +
-          '<div class="poster-side-title">報名 QR Code</div>' +
-          '<div class="poster-qr-box" id="poster-qrcode"></div>' +
-          '<div class="poster-link">' + (applyLink ? escHtml(applyLink) : "尚未提供報名連結") + '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-
-  document.getElementById("m-body").innerHTML = body;
-
-  document.getElementById("modal-footer-btns").innerHTML = applyLink.toLowerCase().startsWith("http")
-    ? '<a href="' + escHtml(applyLink) + '" class="btn btn-primary flex-grow-1 py-3" target="_blank" rel="noopener" style="background:var(--primary);border:none;font-weight:600;">立即報名</a>'
-    : '<div class="btn btn-secondary flex-grow-1 py-3" style="font-weight:600;">尚未開放</div>';
-
-  modal.show();
-
-  setTimeout(() => {
-    const qrBox = document.getElementById("poster-qrcode");
-    if (qrBox) {
-      qrBox.innerHTML = "";
-      if (applyLink && /^https?:\/\//i.test(applyLink)) {
-        new QRCode(qrBox, { text: applyLink, width: 128, height: 128 });
-      } else {
-        qrBox.innerHTML = '<div class="text-muted small">尚未提供連結</div>';
-      }
-    }
-  }, 150);
-}
+/* showDetail() 已移除：按鈕直接嵌入卡片與清單列 */
 
 window.onload = init;
 </script>
