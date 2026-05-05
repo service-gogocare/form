@@ -155,6 +155,22 @@ body{
 /* 卡片底部按鈕行 */
 .card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 
+/* 上課方式標籤（對應 CSV「上課方式」欄位） */
+.tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:.8rem;font-weight:700;white-space:nowrap;}
+.tag-real  {background:#fdecea;color:#a52020;}   /* 實體課程 */
+.tag-online{background:#e1f5ee;color:#0a5e48;}   /* 線上同步課程 */
+.tag-live  {background:#fff4e0;color:#6b4100;}   /* 直播課程 */
+
+/* 布林徽章（同步護理積分 / 住宿機構品質獎勵 / 轉播課程 等欄位值為 TRUE 時顯示） */
+.bool-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 7px;border-radius:4px;
+  font-size:.75rem;font-weight:600;background:#e8f4fb;color:#1a6080;
+}
+
+/* 時數 / 積分小標 */
+.meta-pts{color:var(--accent);font-weight:700;}
+
 #listView{display:block;}
 #cardView{display:none;}
 @media (max-width:768px){
@@ -188,11 +204,11 @@ body{
           <input type="date" id="dateEnd" class="form-control border-2">
         </div>
         <div class="col-12 mt-3 mb-2">
-          <label class="chip-group-label"><i class="fa fa-filter me-1"></i>活動屬性篩選</label>
+          <label class="chip-group-label"><i class="fa fa-filter me-1"></i>上課方式篩選</label>
           <div id="attrChips" class="chip-container"></div>
         </div>
         <div class="col-12">
-          <label class="chip-group-label"><i class="fa fa-tags me-1"></i>活動分類篩選</label>
+          <label class="chip-group-label"><i class="fa fa-tags me-1"></i>課程屬性、類別篩選</label>
           <div id="catChips" class="chip-container"></div>
         </div>
       </div>
@@ -226,7 +242,7 @@ body{
 const ORG_NAME = "GOGOCARE";
 const FOOTER_COPYRIGHT = "© 2026 GOGOCARE All Rights Reserved";
 const FOOTER_CONTACT = "聯絡我們：service@example.com";
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDf1yb-PiBzSRzr7w403HG89htbeOLmm7LRoPSViNE-4YX5L6Y96o-w0si5l22hmFntkxQ9B3VUWJA/pub?output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pub?output=csv";
 /* ============================================================ */
 
 let db = [], selectedCats = [], selectedAttrs = [];
@@ -258,18 +274,26 @@ function buildAttrPill(text) {
   return '<span class="attr-pill" style="background:' + getColor(text) + ';">' + escHtml(text) + '</span>';
 }
 
+/* 判斷課程是否已過期：依 _date（清理後的日期）+ _endTime */
 function isExpired(d) {
-  const endDay = d["活動結束日期"] || d["活動開始日期"];
-  const endTime = d["活動結束時間"] || "23:59";
-  return new Date() > new Date(endDay + " " + endTime);
+  if (!d._date) return false;
+  /* "2026/1/16" → 解析為本地時間 */
+  const parts = d._date.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (!parts) return false;
+  const endTime = d._endTime || "23:59";
+  const endDt = new Date(+parts[1], +parts[2]-1, +parts[3],
+    +endTime.split(":")[0]||23, +endTime.split(":")[1]||59);
+  return new Date() > endDt;
 }
 
+/* 格式化售價：純數字 → NT$x,xxx；已有前綴 → 直接顯示；空 → 免費 */
 function priceText(v) {
-  const raw = String(v == null ? "" : v).trim().replace(/,/g,"");
+  const raw = String(v == null ? "" : v).trim();
   if (!raw) return "免費";
-  if (/^0+(\.0+)?$/.test(raw)) return "免費";
-  if (/^\d+$/.test(raw)) return "NT$" + Number(raw).toLocaleString();
-  return raw;
+  const noComma = raw.replace(/,/g,"");
+  if (/^0+(\.0+)?$/.test(noComma)) return "免費";
+  if (/^\d+(\.\d+)?$/.test(noComma)) return "NT$" + Number(noComma).toLocaleString();
+  return raw; /* CSV 已帶 "NT$1,600" 格式，直接輸出 */
 }
 
 function fmtCalDate(dateStr, timeStr) {
@@ -328,15 +352,56 @@ function init() {
 
   Papa.parse(CSV_URL, {
     download: true,
-    header: true,
-    skipEmptyLines: true,
+    header: false,        /* 不讓 PapaParse 自動抓第一列為 header，因為第一列是說明文字 */
+    skipEmptyLines: false,
     complete(res) {
-      db = res.data.map(row => {
-        const clean = {};
-        Object.keys(row).forEach(k => clean[k.trim()] = row[k] ? row[k].trim() : "");
-        clean._status = row[Object.keys(row)[0]] || "";
-        return clean;
-      }).filter(r => r["活動主題"]);
+      const rows = res.data;
+
+      /* 找含有「課程名稱」欄位的那一列作為真正的 header（CSV 第二列） */
+      const headerIdx = rows.findIndex(row =>
+        row.some(cell => String(cell).replace(/\n/g,"").trim() === "課程名稱")
+      );
+      if (headerIdx < 0) {
+        const errHtml = '<div class="text-center py-5 text-muted">找不到 CSV 標題列（需含「課程名稱」欄位）</div>';
+        document.getElementById("listView").innerHTML = errHtml;
+        document.getElementById("cardView").innerHTML = '<div class="col-12">' + errHtml + '</div>';
+        return;
+      }
+
+      /* 清理 header 名稱：移除換行符（CSV 中部分欄位名稱有換行） */
+      const headers = rows[headerIdx].map(h => String(h).replace(/\n/g,"").trim());
+
+      /* 前向填充：日期/時間/時數/積分/方式/售價 若該列為空，繼承上一筆 */
+      let ffDate="", ffTime="", ffHours="", ffCredits="", ffMode="", ffPrice="";
+
+      db = rows.slice(headerIdx + 1).map(row => {
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = row[i] ? String(row[i]).replace(/\n/g, " ").trim() : "";
+        });
+
+        /* 前向填充 */
+        if (obj["預計日期"])      ffDate    = obj["預計日期"];    else obj["預計日期"]      = ffDate;
+        if (obj["預計時間"])      ffTime    = obj["預計時間"];    else obj["預計時間"]      = ffTime;
+        if (obj["課程時數(小時)"]) ffHours   = obj["課程時數(小時)"]; else obj["課程時數(小時)"] = ffHours;
+        if (obj["預計積分數"])    ffCredits = obj["預計積分數"]; else obj["預計積分數"]    = ffCredits;
+        if (obj["上課方式"])      ffMode    = obj["上課方式"];    else obj["上課方式"]      = ffMode;
+        if (obj["售價"])          ffPrice   = obj["售價"];        else obj["售價"]          = ffPrice;
+
+        /* 衍生欄位：清理日期（移除星期標注 "2026/1/16 (五)" → "2026/1/16"） */
+        obj._date = obj["預計日期"].replace(/\s*[（(][^）)]*[）)]/g, "").trim();
+
+        /* 衍生欄位：拆分時間 "18:00-21:00" → _startTime / _endTime */
+        const tp = obj["預計時間"].split(/[-–—~～]/);
+        obj._startTime = (tp[0] || "").trim();
+        obj._endTime   = (tp[1] || "").trim();
+
+        /* 狀態欄：用「課程狀態」欄位 */
+        obj._status = obj["課程狀態"] || "";
+
+        return obj;
+      }).filter(r => r["課程名稱"]); /* 只保留有課程名稱的列 */
+
       setupFilters();
       render();
     },
@@ -384,9 +449,14 @@ function init() {
 function setupFilters() {
   const cats = new Set(), attrs = new Set();
   db.forEach(d => {
-    if (d._status.includes("隱藏")) return;
-    if (d["活動分類"]) d["活動分類"].split(/[，,]/).forEach(c => cats.add(c.trim()));
-    if (d["活動屬性"]) attrs.add(d["活動屬性"].trim());
+    /* 課程屬性、類別（以逗號或空白分隔，可多行，清理後加入 Set） */
+    if (d["預計課程屬性、類別"]) {
+      d["預計課程屬性、類別"].split(/[，,]/).forEach(c => {
+        const t = c.trim(); if (t) cats.add(t);
+      });
+    }
+    /* 上課方式（線上同步課程 / 直播課程 / 實體課程…） */
+    if (d["上課方式"]) attrs.add(d["上課方式"].trim());
   });
 
   document.getElementById("catChips").innerHTML = Array.from(cats).sort().map(v =>
@@ -417,126 +487,151 @@ function render() {
   const de = document.getElementById("dateEnd").value ? new Date(document.getElementById("dateEnd").value).getTime() : null;
 
   let list = db.filter(d => {
-    if (d._status.includes("隱藏")) return false;
     const past = isExpired(d);
     if (!showExp && past) return false;
-    const matchK = (d["活動主題"]||"").toLowerCase().includes(key) || (d["活動講師"]||"").toLowerCase().includes(key);
+    /* 關鍵字：搜尋課程名稱 + 開課單位 + 課程屬性類別 */
+    const matchK = (d["課程名稱"]||"").toLowerCase().includes(key)
+                || (d["開課單位"]||"").toLowerCase().includes(key)
+                || (d["預計課程屬性、類別"]||"").toLowerCase().includes(key);
     if (!matchK) return false;
-    const dCats = d["活動分類"] ? d["活動分類"].split(/[，,]/).map(x => x.trim()) : [];
+    /* 課程屬性、類別篩選（逗號分隔，任一符合即可） */
+    const dCats = d["預計課程屬性、類別"] ? d["預計課程屬性、類別"].split(/[，,]/).map(x => x.trim()) : [];
     if (selectedCats.length && !dCats.some(c => selectedCats.includes(c))) return false;
-    if (selectedAttrs.length && !selectedAttrs.includes(d["活動屬性"])) return false;
-    const sd = new Date(d["活動開始日期"]).getTime();
-    const ed = new Date(d["活動結束日期"] || d["活動開始日期"]).getTime();
-    if (ds && ed < ds) return false;
-    if (de && sd > de) return false;
+    /* 上課方式篩選 */
+    if (selectedAttrs.length && !selectedAttrs.includes(d["上課方式"])) return false;
+    /* 日期範圍篩選 */
+    const dateParts = d._date.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    const sd = dateParts ? new Date(+dateParts[1], +dateParts[2]-1, +dateParts[3]).getTime() : null;
+    if (sd) {
+      if (ds && sd < ds) return false;
+      if (de && sd > de) return false;
+    }
     return true;
   });
 
   list.sort((a,b) => {
-    const ap = a._status.includes("置頂") ? 1 : 0;
-    const bp = b._status.includes("置頂") ? 1 : 0;
-    if (ap !== bp) return bp - ap;
     const ae = isExpired(a), be = isExpired(b);
-    if (ae !== be) return ae - be;
-    const da = new Date(a["活動開始日期"]);
-    const db_ = new Date(b["活動開始日期"]);
-    return ae ? db_ - da : da - db_;
+    if (ae !== be) return ae - be; /* 未過期在前 */
+    /* 同狀態依日期升序排列 */
+    const parse = d => {
+      const m = d._date.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      return m ? new Date(+m[1], +m[2]-1, +m[3]).getTime() : 0;
+    };
+    return ae ? parse(b) - parse(a) : parse(a) - parse(b);
   });
 
   document.getElementById("status-bar").innerHTML =
     '<span class="text-muted me-3">最後更新：' + lastUpdateTime + '</span> 找到 ' + list.length + ' 個活動';
 
-  /* ── 桌機清單視圖（listView）──
-     右側：價格 + 「加到行事曆」+ 「立即報名/尚未開放」*/
-  document.getElementById("listView").innerHTML = list.map(d => {
-    const isPinned = d._status.includes("置頂");
-    const past = isExpired(d);
-    const price = priceText(d["價格"]);
-    const tags = buildTags(d["活動分類"]);
-    const attrPill = buildAttrPill(d["活動屬性"]);
-    const startD = d["活動開始日期"];
-    const endD = d["活動結束日期"] || startD;
-    const dateStr = startD === endD ? startD : (startD + " 至 " + endD);
-    const timeStr = (d["活動開始時間"]||"") + (d["活動結束時間"] ? " ~ "+d["活動結束時間"] : "");
-    const pinHtml = isPinned ? '<span class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂</span>' : '';
-    const applyLink = d["報名連結"] || "";
-    /* Google Calendar URL */
-    const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
-    const calEnd   = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
-    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
-    /* 報名按鈕：有連結 → 超連結；無連結 → 灰色禁用文字 */
-    const applyBtn = applyLink.toLowerCase().startsWith("http")
-      ? '<a href="' + escHtml(applyLink) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square me-1"></i>立即報名</a>'
-      : '<span class="btn-apply-disabled">尚未開放</span>';
+  /* 將「上課方式」轉為對應的 tag class */
+  function modeTag(mode) {
+    const m = mode || "";
+    const cls = m.includes("實體") ? "tag-real" : m.includes("直播") ? "tag-live" : "tag-online";
+    return '<span class="tag ' + cls + '">' + escHtml(m) + '</span>';
+  }
 
-    return '<div class="list-item ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '">' +
+  /* 布林徽章：TRUE 才顯示，FALSE / 空 不顯示 */
+  function boolBadge(val, label) {
+    return String(val).trim().toUpperCase() === "TRUE"
+      ? '<span class="bool-badge"><i class="fa fa-check me-1"></i>' + escHtml(label) + '</span>' : "";
+  }
+
+  /* ── 桌機清單視圖（listView）──
+     左：[上課方式 tag][分類 tags] / 課程名稱 / 開課單位・日期・時間・時數・積分・布林徽章
+     右：售價 / 加到行事曆 按鈕 */
+  document.getElementById("listView").innerHTML = list.map(d => {
+    const past = isExpired(d);
+    const price = priceText(d["售價"]);
+    const catTags = buildTags(d["預計課程屬性、類別"]);
+    const timeStr = d._startTime + (d._endTime ? " ~ " + d._endTime : "");
+    const calStart = fmtCalDate(d._date, d._startTime);
+    const calEnd   = fmtCalDate(d._date, d._endTime);
+    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE"
+      + "&text=" + encodeURIComponent(d["課程名稱"]||"")
+      + "&dates=" + calStart + "/" + calEnd
+      + "&details=" + encodeURIComponent("積分：" + (d["預計積分數"]||"") + "｜時數：" + (d["課程時數(小時)"]||""))
+      + "&location=" + encodeURIComponent(d["上課方式"]||"")
+      + "&sf=true&output=xml";
+
+    return '<div class="list-item ' + (past?"is-past":"") + '">' +
       '<div class="list-main">' +
-        '<div class="d-flex flex-wrap gap-2 align-items-center">' + pinHtml + tags + attrPill + '</div>' +
-        '<div class="list-title">' + escHtml(d["活動主題"]||"") + '</div>' +
+        /* 第一行：上課方式 tag + 課程屬性分類 tags */
+        '<div class="d-flex flex-wrap gap-2 align-items-center mb-1">' +
+          modeTag(d["上課方式"]) + catTags +
+        '</div>' +
+        /* 課程名稱（主標題） */
+        '<div class="list-title">' + escHtml(d["課程名稱"]||"") + '</div>' +
+        /* 輔助資訊：開課單位 / 日期 / 時間 / 時數+積分 */
         '<div class="list-meta">' +
-          '<div><i class="fa fa-user-tie"></i>' + escHtml(d["活動講師"]||"—") + '</div>' +
-          '<div><i class="fa-regular fa-calendar"></i>' + escHtml(dateStr) + '</div>' +
-          '<div><i class="fa-regular fa-clock"></i>' + escHtml(timeStr||"—") + '</div>' +
-          '<div><i class="fa fa-location-dot"></i>' + escHtml(d["活動地點"]||"—") + '</div>' +
+          (d["開課單位"] ? '<div><i class="fa fa-building me-1"></i>' + escHtml(d["開課單位"]) + '</div>' : '') +
+          '<div><i class="fa-regular fa-calendar me-1"></i>' + escHtml(d._date||"—") + '</div>' +
+          '<div><i class="fa-regular fa-clock me-1"></i>' + escHtml(timeStr||"—") + '</div>' +
+          (d["課程時數(小時)"] ? '<div><i class="fa fa-hourglass-half me-1"></i>' + escHtml(d["課程時數(小時)"]) + ' 時 <span class="meta-pts">/ ' + escHtml(d["預計積分數"]||"") + ' 積分</span></div>' : '') +
+        '</div>' +
+        /* 布林徽章列（TRUE 才顯示） */
+        '<div class="d-flex flex-wrap gap-1 mt-1">' +
+          boolBadge(d["同步護理積分"],       "同步護理積分") +
+          boolBadge(d["住宿機構品質獎勵"],   "住宿品質獎勵") +
+          boolBadge(d["轉播課程"],           "轉播課程") +
+          boolBadge(d["GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)"], "MEET翻譯") +
         '</div>' +
       '</div>' +
-      /* 右側欄：價格 + 按鈕群（垂直排列） */
+      /* 右側欄：售價 + 加到行事曆 */
       '<div class="list-right">' +
         '<div class="list-price">' + escHtml(price) + '</div>' +
-        '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
-        applyBtn +
+        '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener">' +
+          '<i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
       '</div>' +
     '</div>';
-  }).join("") || '<div class="text-center py-5 text-muted">沒有符合條件的活動</div>';
+  }).join("") || '<div class="text-center py-5 text-muted">沒有符合條件的課程</div>';
 
-  /* ── 手機卡片視圖（cardView）──
-     底部新增按鈕行：「加到行事曆」+ 「立即報名/尚未開放」*/
+  /* ── 手機卡片視圖（cardView）── */
   document.getElementById("cardView").innerHTML = list.map(d => {
-    const isPinned = d._status.includes("置頂");
     const past = isExpired(d);
-    const price = priceText(d["價格"]);
-    const tags = buildTags(d["活動分類"]);
-    const attrPill = buildAttrPill(d["活動屬性"]);
-    const startD = d["活動開始日期"];
-    const endD = d["活動結束日期"] || startD;
-    const startT = d["活動開始時間"];
-    const endT = d["活動結束時間"];
-    const timeInfo = (startD === endD)
-      ? '<div class="info-text-unified"><i class="fa fa-calendar-alt me-2 text-muted"></i>' + escHtml(startD) + '</div>' +
-        '<div class="info-text-unified small" style="opacity:.86"><i class="fa fa-clock me-2 text-muted"></i>' + escHtml(startT) + ' ~ ' + escHtml(endT) + '</div>'
-      : '<div class="info-text-unified small"><i class="fa fa-calendar-check me-2 text-muted"></i>' + escHtml(startD) + '</div>' +
-        '<div class="info-text-unified small" style="opacity:.86"><i class="fa fa-calendar-times me-2 text-muted"></i>' + escHtml(endD) + '</div>';
-    const pinHtml = isPinned ? '<div class="pin-badge"><i class="fa fa-thumbtack"></i> 置頂推薦</div>' : '';
-    const applyLink = d["報名連結"] || "";
-    /* Google Calendar URL */
-    const calStart = fmtCalDate(d["活動開始日期"], d["活動開始時間"]);
-    const calEnd   = fmtCalDate(d["活動結束日期"] || d["活動開始日期"], d["活動結束時間"]);
-    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(d["活動主題"]||"") + "&dates=" + calStart + "/" + calEnd + "&details=" + encodeURIComponent(d["活動簡介"]||"") + "&location=" + encodeURIComponent(d["活動地點"]||"") + "&sf=true&output=xml";
-    /* 報名按鈕 */
-    const applyBtn = applyLink.toLowerCase().startsWith("http")
-      ? '<a href="' + escHtml(applyLink) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square me-1"></i>立即報名</a>'
-      : '<span class="btn-apply-disabled">尚未開放</span>';
+    const price = priceText(d["售價"]);
+    const catTags = buildTags(d["預計課程屬性、類別"]);
+    const timeStr = d._startTime + (d._endTime ? " ~ " + d._endTime : "");
+    const calStart = fmtCalDate(d._date, d._startTime);
+    const calEnd   = fmtCalDate(d._date, d._endTime);
+    const calUrl   = "https://www.google.com/calendar/render?action=TEMPLATE"
+      + "&text=" + encodeURIComponent(d["課程名稱"]||"")
+      + "&dates=" + calStart + "/" + calEnd
+      + "&details=" + encodeURIComponent("積分：" + (d["預計積分數"]||"") + "｜時數：" + (d["課程時數(小時)"]||""))
+      + "&location=" + encodeURIComponent(d["上課方式"]||"")
+      + "&sf=true&output=xml";
 
     return '<div class="col-12">' +
-      '<div class="event-card p-4 ' + (past?"is-past":"") + ' ' + (isPinned?"is-pinned":"") + '">' +
-        pinHtml +
-        '<div class="mb-2 d-flex flex-wrap gap-2">' + tags + '</div>' +
-        '<div class="event-title">' + escHtml(d["活動主題"]||"") + '</div>' +
-        '<div class="instructor-tag"><i class="fa fa-user-tie me-2"></i>' + escHtml(d["活動講師"]||"") + '</div>' +
-        '<div class="time-border">' + timeInfo + '</div>' +
-        /* 卡片底部：屬性標籤 + 價格 */
-        '<div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">' +
-          attrPill +
-          '<span class="fs-4" style="font-weight:700;color:var(--danger);">' + escHtml(price) + '</span>' +
+      '<div class="event-card p-4 ' + (past?"is-past":"") + '">' +
+        /* 上課方式 tag + 課程屬性分類 */
+        '<div class="mb-2 d-flex flex-wrap gap-2">' + modeTag(d["上課方式"]) + catTags + '</div>' +
+        /* 課程名稱 */
+        '<div class="event-title">' + escHtml(d["課程名稱"]||"") + '</div>' +
+        /* 開課單位 */
+        (d["開課單位"] ? '<div class="instructor-tag"><i class="fa fa-building me-2"></i>' + escHtml(d["開課單位"]) + '</div>' : '') +
+        /* 日期時間區塊（左側豎線） */
+        '<div class="time-border">' +
+          '<div class="info-text-unified"><i class="fa fa-calendar-alt me-2 text-muted"></i>' + escHtml(d._date||"—") + '</div>' +
+          '<div class="info-text-unified" style="opacity:.86"><i class="fa fa-clock me-2 text-muted"></i>' + escHtml(timeStr||"—") + '</div>' +
+          (d["課程時數(小時)"] ?
+            '<div class="info-text-unified" style="opacity:.86"><i class="fa fa-hourglass-half me-2 text-muted"></i>' +
+            escHtml(d["課程時數(小時)"]) + ' 時 / <span class="meta-pts">' + escHtml(d["預計積分數"]||"") + ' 積分</span></div>' : '') +
         '</div>' +
-        /* 卡片底部：行事曆 + 報名 按鈕行 */
-        '<div class="card-actions">' +
-          '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
-          applyBtn +
+        /* 布林徽章 */
+        '<div class="d-flex flex-wrap gap-1 mb-2">' +
+          boolBadge(d["同步護理積分"],       "同步護理積分") +
+          boolBadge(d["住宿機構品質獎勵"],   "住宿品質獎勵") +
+          boolBadge(d["轉播課程"],           "轉播課程") +
+          boolBadge(d["GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)"], "MEET翻譯") +
+        '</div>' +
+        /* 底部：售價 + 行事曆按鈕 */
+        '<div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">' +
+          '<span style="font-size:1.2rem;font-weight:700;color:var(--danger);">' + escHtml(price) + '</span>' +
+          '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener">' +
+            '<i class="fa fa-calendar-plus me-1"></i>加到行事曆</a>' +
         '</div>' +
       '</div>' +
     '</div>';
-  }).join("") || '<div class="col-12 text-center py-5 text-muted">沒有符合條件的活動</div>';
+  }).join("") || '<div class="col-12 text-center py-5 text-muted">沒有符合條件的課程</div>';
 
   scheduleNotify(); /* 渲染後通知高度（iframe 用） */
 }
