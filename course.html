@@ -290,14 +290,40 @@ body{
           <label class="chip-group-label">關鍵字搜尋</label>
           <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋課程名稱、開課單位...">
         </div>
-        <div class="col-lg-4 col-6">
-          <label class="chip-group-label">日期（自）</label>
-          <input type="date" id="dateStart" class="form-control border-2">
-        </div>
-        <div class="col-lg-4 col-6">
-          <label class="chip-group-label">日期（至）</label>
-          <input type="date" id="dateEnd" class="form-control border-2">
-        </div>
+          <div class="col-lg-4 col-6">
+            <label class="chip-group-label">日期（自）</label>
+            <div class="d-flex gap-2">
+              <select id="dateStartYear" class="form-select border-2" style="min-width:0;flex:1;">
+                <option value="">年份</option>
+              </select>
+              <select id="dateStartMonth" class="form-select border-2" style="min-width:0;flex:1;">
+                <option value="">月份</option>
+                <option value="1">1月</option><option value="2">2月</option>
+                <option value="3">3月</option><option value="4">4月</option>
+                <option value="5">5月</option><option value="6">6月</option>
+                <option value="7">7月</option><option value="8">8月</option>
+                <option value="9">9月</option><option value="10">10月</option>
+                <option value="11">11月</option><option value="12">12月</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-lg-4 col-6">
+            <label class="chip-group-label">日期（至）</label>
+            <div class="d-flex gap-2">
+              <select id="dateEndYear" class="form-select border-2" style="min-width:0;flex:1;">
+                <option value="">年份</option>
+              </select>
+              <select id="dateEndMonth" class="form-select border-2" style="min-width:0;flex:1;">
+                <option value="">月份</option>
+                <option value="1">1月</option><option value="2">2月</option>
+                <option value="3">3月</option><option value="4">4月</option>
+                <option value="5">5月</option><option value="6">6月</option>
+                <option value="7">7月</option><option value="8">8月</option>
+                <option value="9">9月</option><option value="10">10月</option>
+                <option value="11">11月</option><option value="12">12月</option>
+              </select>
+            </div>
+          </div>
         <div class="col-12 mt-3 mb-2">
           <label class="chip-group-label"><i class="fa fa-chalkboard me-1"></i>上課方式</label>
           <div id="attrChips" class="chip-container"></div>
@@ -344,6 +370,12 @@ const CAT_GROUPS = [
     label: "特找積分",
     cats: ["感染管制", "緊急應變", "消防安全", "性別敏感度",
            "原住民族文化敏感度及能力", "多元族群文化敏感度及能力", "其他"]
+  },
+  {
+    label: "副標籤",
+    cats: ["同步護理積分", "住宿機構品質獎勵",
+           "GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)", "轉播課程"],
+    isBool: true
   }
 ];
 const CANONICAL_CATS = CAT_GROUPS.flatMap(g => g.cats);
@@ -352,6 +384,7 @@ const CANONICAL_CATS = CAT_GROUPS.flatMap(g => g.cats);
 const CAT_DISPLAY = {
   "原住民族文化敏感度及能力": "原住民族",
   "多元族群文化敏感度及能力": "多元族群",
+  "GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)": "內建翻譯字幕",
 };
 function catDisplayLabel(tag) { return CAT_DISPLAY[tag] || tag; }
 
@@ -522,7 +555,8 @@ function buildCatTags(tags) {
 function buildBoolTags(boolTags) {
   if (!boolTags || !boolTags.length) return "";
   const inner = boolTags.map(def =>
-    '<span class="bool-tag ' + def.cls + '">' + escHtml(def.key) + "</span>"
+    '<span class="bool-tag ' + def.cls + '" title="' + escHtml(def.key) + '">' +
+    escHtml(catDisplayLabel(def.key)) + "</span>"
   ).join("");
   return '<div class="bool-tags-row">' + inner + "</div>";
 }
@@ -683,16 +717,44 @@ function init() {
     }
   });
 
-  ["searchInp","dateStart","dateEnd","showExpired"].forEach(id => {
-    document.getElementById(id).onchange = render;
-    if (id === "searchInp") document.getElementById(id).oninput = render;
+  // 動態填充年份選單（從資料萃取）
+  (function populateYears() {
+    const yearSet = new Set();
+    db.forEach(g => {
+      if (g._date) {
+        const m = String(g._date).match(/(\d{4})/);
+        if (m) yearSet.add(parseInt(m[1]));
+      }
+    });
+    const years = Array.from(yearSet).sort();
+    ["dateStartYear","dateEndYear"].forEach(id => {
+      const sel = document.getElementById(id);
+      years.forEach(y => {
+        const opt = document.createElement("option");
+        opt.value = y; opt.textContent = y + "年";
+        sel.appendChild(opt);
+      });
+    });
+  })();
+
+  ["searchInp","showExpired"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.onchange = render;
+    if (id === "searchInp") el.oninput = render;
+  });
+  ["dateStartYear","dateStartMonth","dateEndYear","dateEndMonth"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.onchange = render;
   });
 
   document.getElementById("btnClear").onclick = (e) => {
     e.preventDefault();
     document.getElementById("searchInp").value = "";
-    document.getElementById("dateStart").value = "";
-    document.getElementById("dateEnd").value = "";
+    document.getElementById("dateStartYear").value = "";
+    document.getElementById("dateStartMonth").value = "";
+    document.getElementById("dateEndYear").value = "";
+    document.getElementById("dateEndMonth").value = "";
     document.getElementById("showExpired").checked = false;
     selectedCats = []; selectedAttrs = [];
     setupFilters(); render();
@@ -730,7 +792,8 @@ function setupFilters() {
       '<div class="chip-container">' +
         group.cats.map(v =>
           '<div class="chip ' + (selectedCats.includes(v) ? "active" : "") +
-          '" data-type="cat" data-val="' + escHtml(v) + '">' + escHtml(v) + "</div>"
+          '" data-type="cat" data-val="' + escHtml(v) + '">' +
+          escHtml(catDisplayLabel(v)) + "</div>"
         ).join("") +
       '</div>' +
     '</div>'
@@ -755,8 +818,12 @@ function setupFilters() {
 function render() {
   const key     = document.getElementById("searchInp").value.toLowerCase();
   const showExp = document.getElementById("showExpired").checked;
-  const ds = document.getElementById("dateStart").value ? new Date(document.getElementById("dateStart").value).getTime() : null;
-  const de = document.getElementById("dateEnd").value   ? new Date(document.getElementById("dateEnd").value).getTime()   : null;
+  const dsYear  = parseInt(document.getElementById("dateStartYear").value)  || 0;
+  const dsMonth = parseInt(document.getElementById("dateStartMonth").value) || 0;
+  const deYear  = parseInt(document.getElementById("dateEndYear").value)    || 0;
+  const deMonth = parseInt(document.getElementById("dateEndMonth").value)   || 0;
+  const ds = dsYear ? new Date(dsYear, dsMonth ? dsMonth - 1 : 0, 1).getTime() : null;
+  const de = deYear ? new Date(deYear, deMonth ? deMonth : 12, 0, 23, 59, 59).getTime() : null;
 
   let list = db.filter(g => {
     if (g._status.includes("隱藏")) return false;
@@ -770,10 +837,12 @@ function render() {
       if (!inOrg && !inName) return false;
     }
 
-    // 分類：任一子課程的解析標籤符合
+    // 分類：任一子課程的解析標籤符合，或副標籤（bool）命中
     if (selectedCats.length) {
-      const allTags = g._courses.flatMap(c => parseCategoryTags(c.attr));
-      if (!selectedCats.some(sc => allTags.includes(sc))) return false;
+      const allTags    = g._courses.flatMap(c => parseCategoryTags(c.attr));
+      const boolKeys   = (g._boolTags || []).map(t => t.key);
+      const combined   = allTags.concat(boolKeys);
+      if (!selectedCats.some(sc => combined.includes(sc))) return false;
     }
 
     // 上課方式
@@ -824,7 +893,7 @@ function render() {
       "&location=" + encodeURIComponent(g._org || "") +
       "&sf=true&output=xml";
     const applyBtn = (g._applyUrl || "").toLowerCase().startsWith("http")
-      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square"></i> 立即前往</a>'
+      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i>立即前往</a>'
       : '<span class="btn-apply-disabled">尚未開放</span>';
 
     const pinHtml = isPinned ? '<span class="pin-badge me-2"><i class="fa fa-thumbtack"></i> 置頂</span>' : "";
@@ -841,18 +910,14 @@ function render() {
       "</div>";
     }).join("");
 
-    // Header：日期/時間/時數/積分 各加標籤
+    // Header：日期/時間/時數/積分 同一列
     const headerMeta =
       '<div class="gc-meta-row">' +
-        (dateStr ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
-        (timeStr ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
-        (g._org  ? '<span class="gc-meta-item"><span class="gc-meta-label">單位</span>' + escHtml(g._org) + '</span>' : '') +
-      '</div>' +
-      (g._hours || g._pts ?
-        '<div class="gc-meta-row">' +
-          (g._hours ? '<span class="gc-meta-item"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
-          (g._pts   ? '<span class="gc-meta-item"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
-        '</div>' : '');
+        (dateStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
+        (timeStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
+        (g._hours ? '<span class="gc-meta-item"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
+        (g._pts   ? '<span class="gc-meta-item"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
+      '</div>';
 
     return '<div class="list-item ' + (past ? "is-past" : "") + " " + (isPinned ? "is-pinned" : "") + '">' +
       '<div class="list-header">' +
@@ -911,24 +976,20 @@ function render() {
       "</div>";
     }).join("");
 
-    // Header：日期/時間/時數/積分 各加標籤
+    // Header：日期/時間/時數/積分 同一列
     const cardHeader =
       '<div class="gc-card-header">' +
         '<div class="gc-card-header-row1">' +
           '<div style="flex:1;">' +
             '<div class="gc-meta-row">' +
-              (dateStr ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
-              (timeStr ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
+              (dateStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
+              (timeStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
+              (g._hours ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
+              (g._pts   ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
             '</div>' +
           '</div>' +
           typeTag +
         '</div>' +
-        (g._hours || g._pts ?
-          '<div class="gc-meta-row" style="margin-top:4px;">' +
-            (g._hours ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
-            (g._pts   ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
-          '</div>' : '') +
-        (g._org ? '<div class="gc-card-header-org">' + escHtml(g._org) + "</div>" : "") +
       '</div>';
 
     return '<div class="col-12">' +
@@ -958,8 +1019,8 @@ function render() {
 function updateFilterBadge() {
   const total = selectedCats.length + selectedAttrs.length +
     (document.getElementById("searchInp")?.value.trim() ? 1 : 0) +
-    (document.getElementById("dateStart")?.value ? 1 : 0) +
-    (document.getElementById("dateEnd")?.value ? 1 : 0);
+    (document.getElementById("dateStartYear")?.value ? 1 : 0) +
+    (document.getElementById("dateEndYear")?.value ? 1 : 0);
   const badge = document.getElementById("filterActiveBadge");
   if (!badge) return;
   if (total > 0) {
