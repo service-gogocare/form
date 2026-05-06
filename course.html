@@ -23,6 +23,8 @@
   --btn-dark:#2d2d2d;
   --gc-header:#2d2d2d;
   --gc-fill:#fffbee;
+  /* 售價顯示：none = 隱藏；改為 inline 可恢復顯示（清單與卡片皆適用） */
+  --price-display: none;
 }
 
 html { margin:0; padding:0; }
@@ -153,7 +155,10 @@ body{
 }
 
 /* ── 價格文字 ── */
-.price-text{ font-weight:700; color:var(--danger); font-size:1rem; white-space:nowrap; }
+.price-text{
+  display:var(--price-display);
+  font-weight:700; color:var(--danger); font-size:1rem; white-space:nowrap;
+}
 
 /* ── 行動按鈕 ── */
 .item-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
