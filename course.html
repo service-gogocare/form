@@ -77,11 +77,13 @@ body{
 .tag-online { background:#e1f5ee; color:#0a5e48; padding:3px 8px; border-radius:4px; font-size:12px; font-weight:bold; white-space:nowrap; display:inline-block; }
 .tag-live   { background:#fff4e0; color:#6b4100; padding:3px 8px; border-radius:4px; font-size:12px; font-weight:bold; white-space:nowrap; display:inline-block; }
 
-/* ── 分類彩色藥丸標籤 ── */
+/* ── 分類標籤（白底藍框藍字） ── */
 .cat-tag{
   display:inline-flex; align-items:center;
   padding:3px 9px; border-radius:20px;
-  font-size:.78rem; font-weight:700; color:#fff; white-space:nowrap;
+  font-size:14px; font-weight:600;
+  color:#248dc5; background:#fff; border:1px solid #248dc5;
+  white-space:nowrap;
 }
 
 /* ── 分類 chip 群組 ── */
@@ -107,16 +109,19 @@ body{
 .filter-chevron.is-open{ transform:rotate(180deg); }
 .filter-body{ display:block; }
 
-/* ── 副標籤 (bool-tag) ── */
+/* 篩選面板內第一列區塊（上課方式）上方留白 */
+.filter-first-chips{ padding-top:15px; }
+
+/* ── 副標籤 (bool-tag，統一色調與 cat-tag 相同) ── */
 .bool-tags-row{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 0 2px; }
 .bool-tag{
-  display:inline-block; padding:3px 10px; font-size:.75rem;
-  border-radius:20px; border:1px solid; white-space:nowrap; font-weight:600;
+  display:inline-block; padding:3px 10px; font-size:14px;
+  border-radius:20px; border:1px solid #9fa0a0;
+  white-space:nowrap; font-weight:600;
+  color:#9fa0a0; background:#fff;
 }
-.bool-tag-nursing  { border-color:#0d6efd; color:#0d6efd; background:#e7f1ff; }
-.bool-tag-quality  { border-color:#198754; color:#198754; background:#d1e7dd; }
-.bool-tag-subtitle { border-color:#6f42c1; color:#6f42c1; background:#e2d9f3; }
-.bool-tag-broadcast{ border-color:#fd7e14; color:#fd7e14; background:#fff3cd; }
+.bool-tag-nursing, .bool-tag-quality,
+.bool-tag-subtitle, .bool-tag-broadcast { border-color:#9fa0a0; color:#9fa0a0; background:#fff; }
 
 @media (max-width:768px){
   .filter-toggle-btn{ display:flex; }
@@ -200,8 +205,8 @@ body{
 }
 .list-course-row:last-child{ border-bottom:none; }
 .list-attr-cell{
-  min-width:160px; max-width:220px; flex-shrink:0;
-  display:flex; flex-wrap:wrap; gap:4px; padding-right:12px;
+  width:220px; flex-shrink:0;
+  display:flex; flex-wrap:wrap; gap:4px; align-content:flex-start; padding-right:12px;
 }
 .list-name-cell{ flex:1; min-width:0; }
 .list-title{ font-size:.95rem; font-weight:700; color:var(--btn-dark); line-height:1.5; }
@@ -239,13 +244,13 @@ body{
 .gc-card-row:last-child{ border-bottom:none; }
 
 .gc-card-attr{
-  font-size:12px; font-weight:bold;
+  font-size:14px; font-weight:700;
   color:#6b4900; background:var(--gc-fill);
   border-radius:3px; padding:3px 7px;
   flex-shrink:0; white-space:nowrap;
   display:flex; flex-direction:column; align-items:center; gap:2px;
 }
-.gc-card-attr span{ display:block; line-height:1.5; }
+.gc-card-attr span{ display:block; line-height:1.5; font-size:14px; }
 
 .gc-card-name{ font-size:14px; color:#1a1a1a; line-height:1.6; flex:1; }
 .gc-card-sub{ display:block; font-size:12px; color:#666; margin-top:2px; }
@@ -286,45 +291,7 @@ body{
       <!-- 可折疊的篩選主體 -->
       <div id="filterBody" class="filter-body">
       <div class="row g-3">
-        <div class="col-lg-4">
-          <label class="chip-group-label">關鍵字搜尋</label>
-          <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋課程名稱、開課單位...">
-        </div>
-          <div class="col-lg-4 col-6">
-            <label class="chip-group-label">日期（自）</label>
-            <div class="d-flex gap-2">
-              <select id="dateStartYear" class="form-select border-2" style="min-width:0;flex:1;">
-                <option value="">年份</option>
-              </select>
-              <select id="dateStartMonth" class="form-select border-2" style="min-width:0;flex:1;">
-                <option value="">月份</option>
-                <option value="1">1月</option><option value="2">2月</option>
-                <option value="3">3月</option><option value="4">4月</option>
-                <option value="5">5月</option><option value="6">6月</option>
-                <option value="7">7月</option><option value="8">8月</option>
-                <option value="9">9月</option><option value="10">10月</option>
-                <option value="11">11月</option><option value="12">12月</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-lg-4 col-6">
-            <label class="chip-group-label">日期（至）</label>
-            <div class="d-flex gap-2">
-              <select id="dateEndYear" class="form-select border-2" style="min-width:0;flex:1;">
-                <option value="">年份</option>
-              </select>
-              <select id="dateEndMonth" class="form-select border-2" style="min-width:0;flex:1;">
-                <option value="">月份</option>
-                <option value="1">1月</option><option value="2">2月</option>
-                <option value="3">3月</option><option value="4">4月</option>
-                <option value="5">5月</option><option value="6">6月</option>
-                <option value="7">7月</option><option value="8">8月</option>
-                <option value="9">9月</option><option value="10">10月</option>
-                <option value="11">11月</option><option value="12">12月</option>
-              </select>
-            </div>
-          </div>
-        <div class="col-12 mt-3 mb-2">
+        <div class="col-12 mt-1 mb-2 filter-first-chips">
           <label class="chip-group-label"><i class="fa fa-chalkboard me-1"></i>上課方式</label>
           <div id="attrChips" class="chip-container"></div>
         </div>
@@ -337,11 +304,7 @@ body{
       <div class="control-bar">
         <div id="status-bar" class="fw-bold text-dark"></div>
         <div class="control-right">
-          <label class="switch-box m-0">
-            <input class="form-check-input mt-0" type="checkbox" id="showExpired">
-            <span>顯示已結束</span>
-          </label>
-          <a href="#" class="btn-clear" id="btnClear">重置</a>
+            <a href="#" class="btn-clear" id="btnClear">重置</a>
         </div>
       </div>
       </div><!-- /filterBody -->
@@ -371,12 +334,6 @@ const CAT_GROUPS = [
     cats: ["感染管制", "緊急應變", "消防安全", "性別敏感度",
            "原住民族文化敏感度及能力", "多元族群文化敏感度及能力", "其他"]
   },
-  {
-    label: "副標籤",
-    cats: ["同步護理積分", "住宿機構品質獎勵",
-           "GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)", "轉播課程"],
-    isBool: true
-  }
 ];
 const CANONICAL_CATS = CAT_GROUPS.flatMap(g => g.cats);
 
@@ -545,7 +502,7 @@ function getCol(row, ...keys) {
 /* ── 建立分類標籤 HTML（彩色藥丸，顯示縮短名稱） ── */
 function buildCatTags(tags) {
   return tags.map(label =>
-    '<span class="cat-tag" style="background:' + getColor(label) + ';" title="' + escHtml(label) + '">' +
+    '<span class="cat-tag" title="' + escHtml(label) + '">' +
     escHtml(catDisplayLabel(label)) + "</span>"
   ).join(" ");
 }
@@ -717,45 +674,8 @@ function init() {
     }
   });
 
-  // 動態填充年份選單（從資料萃取）
-  (function populateYears() {
-    const yearSet = new Set();
-    db.forEach(g => {
-      if (g._date) {
-        const m = String(g._date).match(/(\d{4})/);
-        if (m) yearSet.add(parseInt(m[1]));
-      }
-    });
-    const years = Array.from(yearSet).sort();
-    ["dateStartYear","dateEndYear"].forEach(id => {
-      const sel = document.getElementById(id);
-      years.forEach(y => {
-        const opt = document.createElement("option");
-        opt.value = y; opt.textContent = y + "年";
-        sel.appendChild(opt);
-      });
-    });
-  })();
-
-  ["searchInp","showExpired"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.onchange = render;
-    if (id === "searchInp") el.oninput = render;
-  });
-  ["dateStartYear","dateStartMonth","dateEndYear","dateEndMonth"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.onchange = render;
-  });
-
   document.getElementById("btnClear").onclick = (e) => {
     e.preventDefault();
-    document.getElementById("searchInp").value = "";
-    document.getElementById("dateStartYear").value = "";
-    document.getElementById("dateStartMonth").value = "";
-    document.getElementById("dateEndYear").value = "";
-    document.getElementById("dateEndMonth").value = "";
-    document.getElementById("showExpired").checked = false;
     selectedCats = []; selectedAttrs = [];
     setupFilters(); render();
   };
@@ -816,26 +736,10 @@ function setupFilters() {
    render — 篩選 + 渲染
    ════════════════════════════════════════ */
 function render() {
-  const key     = document.getElementById("searchInp").value.toLowerCase();
-  const showExp = document.getElementById("showExpired").checked;
-  const dsYear  = parseInt(document.getElementById("dateStartYear").value)  || 0;
-  const dsMonth = parseInt(document.getElementById("dateStartMonth").value) || 0;
-  const deYear  = parseInt(document.getElementById("dateEndYear").value)    || 0;
-  const deMonth = parseInt(document.getElementById("dateEndMonth").value)   || 0;
-  const ds = dsYear ? new Date(dsYear, dsMonth ? dsMonth - 1 : 0, 1).getTime() : null;
-  const de = deYear ? new Date(deYear, deMonth ? deMonth : 12, 0, 23, 59, 59).getTime() : null;
 
   let list = db.filter(g => {
     if (g._status.includes("隱藏")) return false;
     const past = isExpired(g);
-    if (!showExp && past) return false;
-
-    // 關鍵字：任一子課程名稱或開辦單位
-    if (key) {
-      const inOrg  = (g._org || "").toLowerCase().includes(key);
-      const inName = g._courses.some(c => (c.name || "").toLowerCase().includes(key));
-      if (!inOrg && !inName) return false;
-    }
 
     // 分類：任一子課程的解析標籤符合，或副標籤（bool）命中
     if (selectedCats.length) {
@@ -847,11 +751,6 @@ function render() {
 
     // 上課方式
     if (selectedAttrs.length && !selectedAttrs.includes(g._format.trim())) return false;
-
-    // 日期範圍
-    const sd = g._date ? new Date(g._date).getTime() : null;
-    if (ds && sd !== null && sd < ds) return false;
-    if (de && sd !== null && sd > de) return false;
 
     return true;
   });
@@ -926,12 +825,11 @@ function render() {
         typeTag +
       "</div>" +
       courseRows +
-      '<div class="list-course-row" style="border-top:1px solid var(--line);padding-top:8px;flex-direction:column;align-items:flex-start;gap:8px;">' +
+        '<div class="list-course-row" style="border-top:1px solid var(--line);padding-top:8px;flex-direction:column;align-items:flex-start;gap:8px;">' +
         buildBoolTags(g._boolTags) +
         '<div style="display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;width:100%;">' +
           (price ? '<span class="price-text" style="margin-right:auto;">' + escHtml(price) + "</span>" : "") +
           '<div class="item-actions" style="margin-top:0;">' +
-            '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i> 加到行事曆</a>' +
             applyBtn +
           "</div>" +
         "</div>" +
@@ -959,7 +857,7 @@ function render() {
       "&location=" + encodeURIComponent(g._org || "") +
       "&sf=true&output=xml";
     const applyBtn = (g._applyUrl || "").toLowerCase().startsWith("http")
-      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i>立即前往</a>'
+      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i> 立即前往</a>'
       : '<span class="btn-apply-disabled">尚未開放</span>';
 
     const pinHtml = isPinned ? '<div class="pin-badge mb-2"><i class="fa fa-thumbtack"></i> 置頂推薦</div>' : "";
@@ -976,20 +874,23 @@ function render() {
       "</div>";
     }).join("");
 
-    // Header：日期/時間/時數/積分 同一列
+    // Header：Row1 = 日期/時間 + typeTag；Row2 = 時數/積分（不換行）
     const cardHeader =
       '<div class="gc-card-header">' +
         '<div class="gc-card-header-row1">' +
           '<div style="flex:1;">' +
             '<div class="gc-meta-row">' +
-              (dateStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
-              (timeStr  ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
-              (g._hours ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
-              (g._pts   ? '<span class="gc-meta-item" style="color:#e6c96a;"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
+              (dateStr ? '<span class="gc-meta-item"><span class="gc-meta-label">日期</span>' + escHtml(dateStr) + '</span>' : '') +
+              (timeStr ? '<span class="gc-meta-item"><span class="gc-meta-label">時間</span>' + escHtml(timeStr) + '</span>' : '') +
             '</div>' +
           '</div>' +
           typeTag +
         '</div>' +
+        ((g._hours || g._pts) ?
+          '<div class="gc-meta-row" style="flex-wrap:nowrap;margin-top:4px;">' +
+            (g._hours ? '<span class="gc-meta-item" style="color:#e6c96a;white-space:nowrap;"><span class="gc-meta-label">時數</span>' + escHtml(g._hours) + '</span>' : '') +
+            (g._pts   ? '<span class="gc-meta-item" style="color:#e6c96a;white-space:nowrap;"><span class="gc-meta-label">積分</span>' + escHtml(g._pts) + '</span>' : '') +
+          '</div>' : '') +
       '</div>';
 
     return '<div class="col-12">' +
@@ -1003,7 +904,6 @@ function render() {
         '<div class="gc-card-footer">' +
           (price ? '<span class="price-text">' + escHtml(price) + "</span>" : "") +
           '<div class="item-actions">' +
-            '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i> 加到行事曆</a>' +
             applyBtn +
           "</div>" +
         "</div>" +
@@ -1017,10 +917,7 @@ function render() {
 
 /* ── 更新手機折疊按鈕上的 active badge ── */
 function updateFilterBadge() {
-  const total = selectedCats.length + selectedAttrs.length +
-    (document.getElementById("searchInp")?.value.trim() ? 1 : 0) +
-    (document.getElementById("dateStartYear")?.value ? 1 : 0) +
-    (document.getElementById("dateEndYear")?.value ? 1 : 0);
+  const total = selectedCats.length + selectedAttrs.length;
   const badge = document.getElementById("filterActiveBadge");
   if (!badge) return;
   if (total > 0) {
