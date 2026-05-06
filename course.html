@@ -92,6 +92,43 @@ body{
   display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:.06em;
 }
 
+/* ── 手機篩選折疊按鈕 ── */
+.filter-toggle-btn{
+  display:none;
+  width:100%; padding:10px 4px; background:none; border:none;
+  text-align:left; font-weight:700; font-size:.95rem; color:var(--btn-dark);
+  cursor:pointer; align-items:center; gap:8px;
+}
+.filter-active-badge{
+  background:var(--accent); color:#fff;
+  padding:1px 8px; border-radius:20px; font-size:.75rem; font-weight:700;
+}
+.filter-chevron{ transition:transform .22s; font-size:.8rem; margin-left:auto; }
+.filter-chevron.is-open{ transform:rotate(180deg); }
+.filter-body{ display:block; }
+
+/* ── 副標籤 (bool-tag) ── */
+.bool-tags-row{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 0 2px; }
+.bool-tag{
+  display:inline-block; padding:3px 10px; font-size:.75rem;
+  border-radius:20px; border:1px solid; white-space:nowrap; font-weight:600;
+}
+.bool-tag-nursing  { border-color:#0d6efd; color:#0d6efd; background:#e7f1ff; }
+.bool-tag-quality  { border-color:#198754; color:#198754; background:#d1e7dd; }
+.bool-tag-subtitle { border-color:#6f42c1; color:#6f42c1; background:#e2d9f3; }
+.bool-tag-broadcast{ border-color:#fd7e14; color:#fd7e14; background:#fff3cd; }
+
+@media (max-width:768px){
+  .filter-toggle-btn{ display:flex; }
+  .filter-body{
+    display:none;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+    margin-top:4px;
+  }
+  .filter-body.is-open{ display:block; }
+}
+
 /* ── Header 資訊標籤 ── */
 .gc-meta-label{
   font-size:10px; font-weight:400; opacity:.65;
@@ -237,10 +274,21 @@ body{
 <div id="measure-wrapper">
   <div class="container mb-4 pt-3">
     <div class="console-panel">
+
+      <!-- 手機版折疊按鈕（桌機隱藏） -->
+      <button class="filter-toggle-btn" id="filterToggleBtn" aria-expanded="false">
+        <i class="fa fa-sliders"></i>
+        <span>篩選條件</span>
+        <span id="filterActiveBadge" class="filter-active-badge" style="display:none;"></span>
+        <i class="fa fa-chevron-down filter-chevron" id="filterChevron"></i>
+      </button>
+
+      <!-- 可折疊的篩選主體 -->
+      <div id="filterBody" class="filter-body">
       <div class="row g-3">
         <div class="col-lg-4">
           <label class="chip-group-label">關鍵字搜尋</label>
-          <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋課程名稱、開辦單位...">
+          <input type="text" id="searchInp" class="form-control border-2" placeholder="搜尋課程名稱、開課單位...">
         </div>
         <div class="col-lg-4 col-6">
           <label class="chip-group-label">日期（自）</label>
@@ -270,7 +318,8 @@ body{
           <a href="#" class="btn-clear" id="btnClear">重置</a>
         </div>
       </div>
-    </div>
+      </div><!-- /filterBody -->
+    </div><!-- /console-panel -->
 
     <div id="listView" class="mt-4"></div>
     <div id="cardView" class="row g-3 mt-3"></div>
@@ -292,7 +341,7 @@ const CAT_GROUPS = [
     cats: ["專業課程", "專業品質", "專業倫理", "專業法規", "非積分課程", "積分申請中"]
   },
   {
-    label: "特殊積分",
+    label: "特找積分",
     cats: ["感染管制", "緊急應變", "消防安全", "性別敏感度",
            "原住民族文化敏感度及能力", "多元族群文化敏感度及能力", "其他"]
   }
@@ -305,6 +354,24 @@ const CAT_DISPLAY = {
   "多元族群文化敏感度及能力": "多元族群",
 };
 function catDisplayLabel(tag) { return CAT_DISPLAY[tag] || tag; }
+
+/* ── 副標籤（布林欄位 → 有色徽章）── */
+const BOOL_TAG_DEFS = [
+  { key: "同步護理積分",                         cls: "bool-tag-nursing",
+    cols: ["同步護理積分"] },
+  { key: "住宿機構品質獎勵",                     cls: "bool-tag-quality",
+    cols: ["住宿機構品質獎勵"] },
+  { key: "GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)", cls: "bool-tag-subtitle",
+    cols: ["GOOGLE MEET內建同步翻譯(越南字幕、印尼字幕)", "GOOGLE MEET或同步翻譯(有連結字串、無連結字幕)", "多語字幕"] },
+  { key: "轉播課程",                             cls: "bool-tag-broadcast",
+    cols: ["轉播課程"] },
+];
+
+/* ── 判斷布林欄位是否為 true ── */
+function isTruthy(v) {
+  const s = String(v || "").trim().toUpperCase();
+  return s === "TRUE" || s === "是" || s === "1" || s === "Y" || s === "YES";
+}
 
 /* ── 縮寫 → 正規名稱對照表 ── */
 const CAT_ALIAS = {
@@ -451,6 +518,15 @@ function buildCatTags(tags) {
 }
 
 /* ── 建立上課方式標籤 ── */
+/* 副標籤 HTML 產生器 */
+function buildBoolTags(boolTags) {
+  if (!boolTags || !boolTags.length) return "";
+  const inner = boolTags.map(def =>
+    '<span class="bool-tag ' + def.cls + '">' + escHtml(def.key) + "</span>"
+  ).join("");
+  return '<div class="bool-tags-row">' + inner + "</div>";
+}
+
 function buildTypeTag(type) {
   if (!type) return "";
   return '<span class="' + getTypeClass(type) + '">' + escHtml(type.trim()) + "</span>";
@@ -557,6 +633,11 @@ function init() {
           const st   = rawDate ? t.start : (id === lastId ? lastStartTime : "");
           const et   = rawDate ? t.end   : (id === lastId ? lastEndTime   : "");
 
+          // 計算副標籤（布林欄位）
+          const boolTags = BOOL_TAG_DEFS.filter(def =>
+            def.cols.some(c => isTruthy(row[c]))
+          );
+
           groupMap.set(id, {
             _id:        id,
             _date:      date,
@@ -564,11 +645,12 @@ function init() {
             _endTime:   et,
             _format:    getCol(row, "上課方式", "活動屬性"),
             _hours:     getCol(row, "課程時數(小時)", "課程時數（小時）", "課程時數", "時數"),
-            _pts:       getCol(row, "預計積分積數", "預計積分數", "積分積數", "積分數", "積分"),
-            _fee:       getCol(row, "費用", "價格"),
-            _org:       getCol(row, "開辦單位", "活動講師"),
+            _pts:       getCol(row, "預計積分數", "預計積分積數", "積分數", "積分"),
+            _fee:       getCol(row, "售價", "費用", "價格"),
+            _org:       getCol(row, "開課單位", "開辦單位", "活動講師"),
             _status:    getCol(row, "課程狀態", "_status"),
             _applyUrl:  getCol(row, "報名連結"),
+            _boolTags:  boolTags,
             _courses:   []
           });
         }
@@ -779,11 +861,14 @@ function render() {
         typeTag +
       "</div>" +
       courseRows +
-      '<div class="list-course-row" style="border-top:1px solid var(--line);padding-top:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;">' +
-        (price ? '<span class="price-text" style="margin-right:auto;">' + escHtml(price) + "</span>" : "") +
-        '<div class="item-actions" style="margin-top:0;">' +
-          '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i> 加到行事曆</a>' +
-          applyBtn +
+      '<div class="list-course-row" style="border-top:1px solid var(--line);padding-top:8px;flex-direction:column;align-items:flex-start;gap:8px;">' +
+        buildBoolTags(g._boolTags) +
+        '<div style="display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;width:100%;">' +
+          (price ? '<span class="price-text" style="margin-right:auto;">' + escHtml(price) + "</span>" : "") +
+          '<div class="item-actions" style="margin-top:0;">' +
+            '<a href="' + escHtml(calUrl) + '" class="btn-cal-mini" target="_blank" rel="noopener"><i class="fa fa-calendar-plus"></i> 加到行事曆</a>' +
+            applyBtn +
+          "</div>" +
         "</div>" +
       "</div>" +
     "</div>";
@@ -852,6 +937,7 @@ function render() {
         cardHeader +
         '<div class="gc-card-body">' +
           bodyRows +
+          buildBoolTags(g._boolTags) +
         "</div>" +
         '<div class="gc-card-footer">' +
           (price ? '<span class="price-text">' + escHtml(price) + "</span>" : "") +
@@ -865,9 +951,42 @@ function render() {
   }).join("") || '<div class="col-12 text-center py-5 text-muted">沒有符合條件的課程</div>';
 
   scheduleNotify();
+  updateFilterBadge();
 }
 
-window.onload = init;
+/* ── 更新手機折疊按鈕上的 active badge ── */
+function updateFilterBadge() {
+  const total = selectedCats.length + selectedAttrs.length +
+    (document.getElementById("searchInp")?.value.trim() ? 1 : 0) +
+    (document.getElementById("dateStart")?.value ? 1 : 0) +
+    (document.getElementById("dateEnd")?.value ? 1 : 0);
+  const badge = document.getElementById("filterActiveBadge");
+  if (!badge) return;
+  if (total > 0) {
+    badge.textContent = total;
+    badge.style.display = "";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+/* ── 手機篩選折疊按鈕初始化 ── */
+function initFilterToggle() {
+  const btn     = document.getElementById("filterToggleBtn");
+  const body    = document.getElementById("filterBody");
+  const chevron = document.getElementById("filterChevron");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const isOpen = body.classList.toggle("is-open");
+    chevron.classList.toggle("is-open", isOpen);
+    btn.setAttribute("aria-expanded", isOpen);
+  });
+}
+
+window.onload = function () {
+  initFilterToggle();
+  init();
+};
 </script>
 </body>
 </html>
