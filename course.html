@@ -959,7 +959,7 @@ function render() {
       "&location=" + encodeURIComponent(g._org || "") +
       "&sf=true&output=xml";
     const applyBtn = (g._applyUrl || "").toLowerCase().startsWith("http")
-      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa fa-pen-to-square"></i> 立即前往</a>'
+      ? '<a href="' + escHtml(g._applyUrl) + '" class="btn-apply" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i>立即前往</a>'
       : '<span class="btn-apply-disabled">尚未開放</span>';
 
     const pinHtml = isPinned ? '<div class="pin-badge mb-2"><i class="fa fa-thumbtack"></i> 置頂推薦</div>' : "";
