@@ -745,6 +745,7 @@ function render() {
   let list = db.filter(g => {
     if (g._status.includes("隱藏")) return false;
     const past = isExpired(g);
+    if (past) return false;
 
     // 分類：任一子課程的解析標籤符合，或副標籤（bool）命中
     if (selectedCats.length) {
