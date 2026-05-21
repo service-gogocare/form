@@ -49,12 +49,29 @@ body {
 
 /* ── 頁首 ── */
 .page-header {
-  padding: 20px 0 12px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 -16px 16px;
+  padding: 20px 16px 12px;
+  background-color: #248dc5;
+  border-bottom: none;
 }
-.page-title { font-size: 1.35rem; font-weight: 800; margin: 0; color: var(--text); }
-.page-subtitle { font-size: .85rem; color: var(--muted); margin-top: 2px; }
+.page-header-text { flex: 1; min-width: 0; }
+.page-title {
+  font-size: 1.35rem; font-weight: 800; margin: 0;
+  color: #fff;
+}
+.page-title .fa-laptop-medical { color: #fff !important; }
+.page-subtitle { font-size: .85rem; color: rgba(255, 255, 255, .85); margin-top: 2px; }
+.page-header-logo {
+  flex-shrink: 0;
+  height: 48px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+}
 
 /* ── 篩選面板 ── */
 .filter-panel {
@@ -318,8 +335,16 @@ body {
 
   <!-- 頁首 -->
   <div class="page-header">
-    <h1 class="page-title"><i class="fa-solid fa-laptop-medical me-2" style="color:var(--primary);font-size:1.1rem;"></i>網路課程看板</h1>
-    <p class="page-subtitle" id="update-time">資料載入中…</p>
+    <div class="page-header-text">
+      <h1 class="page-title"><i class="fa-solid fa-laptop-medical me-2" style="font-size:1.1rem;"></i>網路課程看板</h1>
+      <p class="page-subtitle" id="update-time">資料載入中…</p>
+    </div>
+    <img
+      class="page-header-logo"
+      src="https://www.gogocare.com.tw/images/logo_footer.svg"
+      alt="GoGoCare"
+      loading="lazy"
+    >
   </div>
 
   <!-- 篩選面板 -->
