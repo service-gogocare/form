@@ -73,6 +73,24 @@ body {
   object-fit: contain;
 }
 
+/* ── 篩選提示 ── */
+.filter-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffb80;
+  border: 1px solid #bfdbfe;
+  color: var(--primary-dark);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.filter-hint i { font-size: 1rem; color: #004275; }
+.filter-hint span { color: #004275; }
+
 /* ── 篩選面板 ── */
 .filter-panel {
   background: var(--card-bg);
@@ -345,6 +363,12 @@ body {
       alt="GoGoCare"
       loading="lazy"
     >
+  </div>
+
+  <!-- 篩選提示 -->
+  <div class="filter-hint">
+    <i class="fa-solid fa-circle-info"></i>
+    <span>網路課程類別、截止日期快速篩選，幫你馬上找到最合適課程！</span>
   </div>
 
   <!-- 篩選面板 -->
