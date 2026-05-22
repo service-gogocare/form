@@ -50,27 +50,54 @@ body {
 /* ── 頁首 ── */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 16px;
   margin: 0 -16px 16px;
-  padding: 20px 16px 12px;
-  background-color: #248dc5;
+  padding: 0 16px;
+  min-height: 124px;
+  background-color: #ffffff;
   border-bottom: none;
 }
-.page-header-text { flex: 1; min-width: 0; }
-.page-title {
-  font-size: 1.35rem; font-weight: 800; margin: 0;
-  color: #fff;
+.page-header-text {
+  flex: 1; min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-.page-title .fa-laptop-medical { color: #fff !important; }
-.page-subtitle { font-size: .85rem; color: rgba(255, 255, 255, .85); margin-top: 2px; }
+.page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px; font-weight: 800; margin: 0;
+  color: #248DC5;
+  line-height: 1.2;
+}
+.page-title .fa-laptop-medical {
+  color: #248DC5 !important;
+  font-size: 24px;
+  line-height: 1;
+}
+.page-subtitle { font-size: .85rem; color: #248DC5; margin-top: 2px; }
 .page-header-logo {
   flex-shrink: 0;
-  height: 48px;
+  align-self: stretch;
+  height: 100%;
   width: auto;
-  max-width: 160px;
+  max-width: none;
+  max-height: 124px;
   object-fit: contain;
+}
+
+/* 視覺隱藏（保留給 JS / 螢幕閱讀器使用） */
+.is-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ── 篩選提示 ── */
@@ -354,12 +381,12 @@ body {
   <!-- 頁首 -->
   <div class="page-header">
     <div class="page-header-text">
-      <h1 class="page-title"><i class="fa-solid fa-laptop-medical me-2" style="font-size:1.1rem;"></i>網路課程看板</h1>
-      <p class="page-subtitle" id="update-time">資料載入中…</p>
+      <h1 class="page-title"><i class="fa-solid fa-laptop-medical"></i><span>網路課程看板</span></h1>
+      <p class="page-subtitle is-visually-hidden" id="update-time">資料載入中…</p>
     </div>
     <img
       class="page-header-logo"
-      src="https://www.gogocare.com.tw/images/logo_footer.svg"
+      src="https://www.gogocare.com.tw/UserFiles/uploads/images/20260522165334_3906.jpg"
       alt="GoGoCare"
       loading="lazy"
     >
