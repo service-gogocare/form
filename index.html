@@ -376,7 +376,7 @@ body {
 </head>
 
 <body>
-<div class="page-wrap">
+<div class="page-wrap" id="measure-wrapper">
 
   <!-- 頁首 -->
   <div class="page-header">
@@ -973,70 +973,54 @@ document.addEventListener("DOMContentLoaded", init);
 
 <script>
 /* ================================================================
-   iframe 身高自動通報
-   目的：當這個頁面被嵌入 <iframe> 時，主動把目前內容高度
-         透過 postMessage 送給外層，讓外層動態調整 iframe 高度，
-         避免內容被截斷。
-   訊息格式（與外層 listener 一致）：
-     { type: "EVENT_BOARD_RESIZE", height: <number> }
+   iframe 身高自動通報（參考 篩選器.html 的穩健作法）
+   重點：只測量 #measure-wrapper 的「實際底部位置」，
+         不用 document.body.scrollHeight，以避免「iframe 變高
+         → body 也被撐高 → 又回報更大高度」的無限增長迴圈。
+   訊息格式：{ type: "EVENT_BOARD_RESIZE", height: <number> }
    ================================================================ */
 (function () {
   if (window.self === window.top) return;
 
   var lastSent = 0;
-  var rafId = null;
+  var notifyTimer = null;
 
-  function measure() {
-    var b = document.body, h = document.documentElement;
-    return Math.max(
-      b.scrollHeight, b.offsetHeight,
-      h.clientHeight, h.scrollHeight, h.offsetHeight
-    );
+  function getActualContentHeight() {
+    var w = document.getElementById("measure-wrapper");
+    if (!w) return 0;
+    return Math.ceil(w.getBoundingClientRect().bottom);
   }
 
-  function send() {
-    rafId = null;
-    var h = measure();
-    if (Math.abs(h - lastSent) < 5) return;
+  function notifyHeight() {
+    var h = getActualContentHeight();
+    if (h < 100) return;
+    if (Math.abs(h - lastSent) < 10) return;
     lastSent = h;
     try {
       window.parent.postMessage({ type: "EVENT_BOARD_RESIZE", height: h }, "*");
     } catch (e) {}
   }
 
-  function schedule() {
-    if (rafId) return;
-    rafId = window.requestAnimationFrame(send);
+  function scheduleNotify() {
+    if (notifyTimer) clearTimeout(notifyTimer);
+    notifyTimer = setTimeout(notifyHeight, 100);
   }
 
-  document.addEventListener("DOMContentLoaded", schedule);
-  window.addEventListener("load", schedule);
-  window.addEventListener("resize", schedule);
+  document.addEventListener("DOMContentLoaded", scheduleNotify);
+  window.addEventListener("load", scheduleNotify);
+  window.addEventListener("resize", scheduleNotify);
 
   if ("ResizeObserver" in window) {
-    var ro = new ResizeObserver(schedule);
-    ro.observe(document.documentElement);
-    if (document.body) ro.observe(document.body);
-  }
-
-  if ("MutationObserver" in window) {
-    var mo = new MutationObserver(schedule);
     document.addEventListener("DOMContentLoaded", function () {
-      mo.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        characterData: true
-      });
+      var w = document.getElementById("measure-wrapper");
+      if (w) new ResizeObserver(scheduleNotify).observe(w);
     });
   }
-
-  setInterval(schedule, 1000);
 
   window.addEventListener("message", function (e) {
     if (e.data && e.data.type === "REQUEST_BOARD_HEIGHT") {
       lastSent = 0;
-      schedule();
+      scheduleNotify();
     }
   }, false);
 })();
