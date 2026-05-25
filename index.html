@@ -3,35 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>網路課程看板</title>
-<meta name="description" content="網路課程清單，依截止日排序，支援積分主題篩選，即時顯示送審倒數天數。">
+<title>網路課程倒數 · 即將送審的學分</title>
+<meta name="description" content="GOGOCARE 網路課程倒數，幫你抓住最後報名機會。">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <style>
-/* ── 全域變數 ── */
+/* ── 全域變數（採 Gediter 色系） ── */
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --bg: #f1f5f9;
+  --primary: #248dc5;
+  --primary-dark: #1a6e9e;
+  --primary-darker: #135279;
+  --accent: #ff5757;
+  --accent-dark: #d83a3a;
+  --warn: #f59e0b;
+  --warn-dark: #d97706;
+  --ink: #2a2a2a;
+  --ink-2: #4b4b4b;
+  --muted: #9fa0a0;
+  --line: #dcdddd;
+  --bg: #f4f6f8;
   --card-bg: #ffffff;
-  --text: #1e293b;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --badge-urgent-bg: #fef2f2;
-  --badge-urgent-text: #dc2626;
-  --badge-warn-bg: #fff7ed;
-  --badge-warn-text: #ea580c;
-  --badge-ok-bg: #f0fdf4;
-  --badge-ok-text: #16a34a;
-  --badge-expired-bg: #f8fafc;
-  --badge-expired-text: #94a3b8;
-  --tag-theme-bg: #eff6ff;
-  --tag-theme-text: #1d4ed8;
-  --tag-special-bg: #faf5ff;
-  --tag-special-text: #7c3aed;
+  --aux-1: #a8acd6;
+  --aux-2: #eee800;
+  --tag-theme-bg: #eaf4fb;
+  --tag-theme-text: #135279;
+  --tag-special-bg: #f3eefc;
+  --tag-special-text: #6b21a8;
   --thumb-placeholder: #dde1e7;
 }
 
@@ -39,7 +39,7 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--bg);
   font-family: 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
-  color: var(--text);
+  color: var(--ink);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -47,330 +47,628 @@ body {
 /* ── 容器 ── */
 .page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
 
-/* ── 頁首 ── */
-.page-header {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 0 -16px 16px;
-  padding: 0 16px;
-  min-height: 124px;
-  background-color: #F1F5F9;
-  border-bottom: none;
+img { max-width: 100%; height: auto; display: block; }
+
+/* ════════════════════════════════════════
+   HERO 倒數狙擊區
+   ════════════════════════════════════════ */
+.hero-countdown {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(255,255,255,.08) 0, transparent 45%),
+    linear-gradient(135deg, var(--primary) 0%, var(--primary-darker) 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 22px 20px;
+  margin: 16px -16px 18px;
+  box-shadow: 0 8px 24px rgba(36,141,197,.18);
+  position: relative;
+  overflow: hidden;
 }
-.page-header-text {
-  flex: 1; min-width: 0;
+.hero-inner {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 16px;
 }
-.page-title {
+.hero-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.hero-text { flex: 1; min-width: 0; }
+.hero-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 24px; font-weight: 800; margin: 0;
-  color: #248DC5;
-  line-height: 1.2;
+  gap: 6px;
+  background: rgba(255,255,255,.16);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: .04em;
+  margin-bottom: 8px;
 }
-.page-title .fa-laptop-medical {
-  color: #248DC5 !important;
-  font-size: 24px;
-  line-height: 1;
+.hero-title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  color: #fff;
 }
-.page-subtitle { font-size: .85rem; color: #248DC5; margin-top: 2px; }
-.page-header-logo {
+.hero-title .hero-accent { color: var(--aux-2); }
+.hero-subtitle {
+  font-size: .92rem;
+  color: rgba(255,255,255,.86);
+  margin: 0;
+  line-height: 1.55;
+}
+.hero-subtitle strong {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0 2px;
+}
+
+.hero-logo {
   flex-shrink: 0;
-  align-self: center;
-  height: 99px;
+  height: 64px;
   width: auto;
-  max-width: none;
-  max-height: 99px;
+  max-height: 64px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
   object-fit: contain;
 }
 
-/* 視覺隱藏（保留給 JS / 螢幕閱讀器使用） */
-.is-visually-hidden {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* ── 篩選提示 ── */
-.filter-hint {
+/* HERO 統計卡（單張，紅色強調） */
+.hero-stats { display: flex; }
+.stat-card {
+  flex: 1;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #fffb80;
-  border: 1px solid #bfdbfe;
-  color: var(--primary-dark);
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  font-size: 1rem;
+  gap: 12px;
+  box-shadow: 0 6px 14px rgba(255,87,87,.25);
+}
+.stat-card-icon {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.stat-card-body { flex: 1; min-width: 0; line-height: 1.25; }
+.stat-card-label {
+  font-size: .78rem;
+  opacity: .92;
   font-weight: 600;
-  line-height: 1.5;
+  letter-spacing: .04em;
 }
-.filter-hint i { font-size: 1rem; color: #004275; }
-.filter-hint span { color: #004275; }
+.stat-card-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.stat-card-unit { font-size: .82rem; opacity: .9; font-weight: 700; }
 
-/* ── 篩選面板 ── */
-.filter-panel {
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+/* ════════════════════════════════════════
+   分區（section-block）
+   ════════════════════════════════════════ */
+.section-block { margin-bottom: 26px; }
+.section-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 12px;
+  line-height: 1.3;
+  padding-left: 10px;
+  border-left: 4px solid var(--primary);
 }
-.filter-toggle-btn {
-  display: none;
-  width: 100%; padding: 0; background: none; border: none;
-  text-align: left; font-weight: 700; font-size: .95rem; color: var(--text);
-  cursor: pointer; align-items: center; gap: 8px;
+.section-block-title .pill {
+  background: var(--line);
+  color: var(--ink-2);
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
-.filter-active-badge {
-  background: var(--primary); color: #fff;
-  padding: 1px 8px; border-radius: 20px; font-size: .75rem; font-weight: 700;
-}
-.filter-chevron { transition: transform .2s; font-size: .78rem; margin-left: auto; }
-.filter-chevron.is-open { transform: rotate(180deg); }
-.filter-body { display: block; }
-.filter-group { margin-bottom: 12px; }
-.filter-group:last-child { margin-bottom: 0; }
-.filter-group-label {
-  font-size: .72rem; font-weight: 700; color: var(--muted);
-  display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em;
-}
-.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip {
-  padding: 5px 14px; border-radius: 50px;
-  background: #f1f5f9; border: 1.5px solid var(--line);
-  font-size: .85rem; font-weight: 600; color: var(--muted);
-  cursor: pointer; transition: .15s; user-select: none;
-}
-.chip:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
-.chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-.chip.chip-special.active { background: #7c3aed; border-color: #7c3aed; }
-.chip.chip-empty { opacity: .42; }
-.chip.chip-empty:hover { opacity: 1; }
-.chip.chip-month.active { background: #0f766e; border-color: #0f766e; }
-.chip-count { font-size: .72em; opacity: .7; }
-
-@media (max-width: 767px) {
-  .filter-toggle-btn { display: flex; }
-  .filter-body {
-    display: none; padding-top: 14px;
-    border-top: 1px solid var(--line); margin-top: 10px;
-  }
-  .filter-body.is-open { display: block; }
+.section-block-sub {
+  font-size: .85rem;
+  color: var(--muted);
+  margin: -6px 0 10px;
+  padding-left: 14px;
 }
 
-/* ── 狀態列 ── */
-.status-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: .82rem; color: var(--muted); margin-bottom: 14px;
-  flex-wrap: wrap; gap: 4px;
-}
-.status-count { font-weight: 700; color: var(--text); }
+/* 急件區的紅色標題 */
+.section-urgent .section-block-title { border-left-color: var(--accent); }
+.section-urgent .section-block-title i { color: var(--accent); }
 
-/* ── 標籤 ── */
+/* 本週主打的橘色標題 */
+.section-week .section-block-title { border-left-color: var(--warn-dark); }
+.section-week .section-block-title i { color: var(--warn-dark); }
+
+/* 兩週內的藍色標題 */
+.section-fortnight .section-block-title { border-left-color: var(--primary); }
+.section-fortnight .section-block-title i { color: var(--primary); }
+
+/* 主題分區 / 特找積分大標 */
+.group-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 18px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.group-title .group-count {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  background: var(--tag-theme-bg);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.by-special .group-title .group-count {
+  color: var(--tag-special-text);
+  background: var(--tag-special-bg);
+}
+
+/* ════════════════════════════════════════
+   標籤 / 倒數徽章
+   ════════════════════════════════════════ */
+.tag-theme,
+.tag-special {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
 .tag-theme {
-  display: inline-block; padding: 2px 9px; border-radius: 20px;
-  font-size: 12px; font-weight: 600;
-  background: var(--tag-theme-bg); color: var(--tag-theme-text);
-  border: 1px solid #bfdbfe; white-space: nowrap;
+  background: var(--tag-theme-bg);
+  color: var(--tag-theme-text);
+  border-color: #bcdcef;
 }
 .tag-special {
-  display: inline-block; padding: 2px 9px; border-radius: 20px;
-  font-size: 12px; font-weight: 600;
-  background: var(--tag-special-bg); color: var(--tag-special-text);
-  border: 1px solid #ddd6fe; white-space: nowrap;
+  background: var(--tag-special-bg);
+  color: var(--tag-special-text);
+  border-color: #e0d3f5;
 }
 
-/* ── 倒數徽章 ── */
 .countdown-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 10px; border-radius: 20px;
-  font-size: 12px; font-weight: 700; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
-.countdown-urgent { background: var(--badge-urgent-bg); color: var(--badge-urgent-text); }
-.countdown-warn   { background: var(--badge-warn-bg);   color: var(--badge-warn-text); }
-.countdown-ok     { background: var(--badge-ok-bg);     color: var(--badge-ok-text); }
-.countdown-expired { background: var(--badge-expired-bg); color: var(--badge-expired-text); }
+/* 倒數徽章三階：urgent（≤3 天，深紅）／ warn（4–7 天，淺紅）／ ok（>7 天，藍） */
+.countdown-urgent { background: #ffe0e0; color: #c0392b; border: 1px solid #f5a3a3; }
+.countdown-warn   { background: #fed7d7; color: #e54444; border: 1px solid #fab5b5; }
+.countdown-ok     { background: #eaf4fb; color: var(--primary-darker); border: 1px solid #c7e1f0; }
 
-/* ══════════════════════════════════════════
-   手機 清單視圖（預設：mobile-first）
-   ══════════════════════════════════════════ */
-.list-view { display: flex; flex-direction: column; gap: 10px; }
-.list-item {
+/* ════════════════════════════════════════
+   今日 / 48 小時急件大卡
+   ════════════════════════════════════════ */
+.urgent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.urgent-card {
   background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  display: flex; gap: 12px;
-  padding: 12px;
-  text-decoration: none; color: inherit;
-  transition: box-shadow .15s, border-color .15s;
-  cursor: pointer;
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 18px rgba(255,87,87,.15);
+  animation: urgent-pulse 2s ease-in-out infinite;
+  transition: transform .15s;
 }
-.list-item:hover { box-shadow: 0 4px 16px rgba(37,99,235,.10); border-color: #93c5fd; }
-.list-item.is-expired { opacity: .55; }
-
-.list-thumb {
-  flex-shrink: 0;
-  width: 110px; height: 82px;
-  border-radius: 8px; overflow: hidden;
+.urgent-card:hover {
+  color: inherit;
+  transform: translateY(-2px);
+}
+@keyframes urgent-pulse {
+  0%, 100% { box-shadow: 0 4px 18px rgba(255,87,87,.15); }
+  50%      { box-shadow: 0 4px 28px rgba(255,87,87,.45); }
+}
+.urgent-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
   background: var(--thumb-placeholder);
+  position: relative;
+  flex-shrink: 0;
 }
-.list-thumb img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.list-thumb .thumb-placeholder {
+.urgent-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.urgent-thumb .thumb-placeholder {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-  color: rgba(255,255,255,.5); font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-darker) 100%);
+  color: rgba(255,255,255,.55); font-size: 2rem;
+}
+.urgent-flag {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: .04em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.urgent-body {
+  padding: 14px 16px 16px;
+  display: flex; flex-direction: column;
+  gap: 8px;
+}
+.urgent-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.urgent-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.urgent-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-size: .85rem; color: var(--ink-2);
+}
+.urgent-meta .pts { font-weight: 800; color: var(--ink); }
+.urgent-meta .sep { color: var(--line); }
+
+.urgent-hours {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .95rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+.urgent-hours i { font-size: .9rem; }
+
+.urgent-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fafbfc;
+}
+.deadline-text { font-size: .82rem; color: var(--muted); }
+.deadline-text strong { color: var(--ink); font-weight: 700; }
+
+/* CTA 按鈕 */
+.btn-goto {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: .85rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s, transform .1s;
+  white-space: nowrap;
+}
+.btn-goto:hover { background: var(--primary-dark); color: #fff; transform: translateY(-1px); }
+/* 整卡 hover 時，內嵌的 CTA 視覺按鈕也亮一下（因 .btn-goto 為 <span>，自身 :hover 不會觸發） */
+.small-card:hover .btn-goto { background: var(--primary-dark); }
+.btn-goto-large {
+  background: var(--accent);
+  font-size: .95rem;
+  font-weight: 800;
+  padding: 9px 18px;
+}
+.btn-goto-large:hover { background: var(--accent-dark); color: #fff; }
+.urgent-card:hover .btn-goto-large { background: var(--accent-dark); }
+.btn-goto-disabled {
+  background: var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.list-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.list-title {
-  font-size: .92rem; font-weight: 700; line-height: 1.4;
-  color: var(--text); display: -webkit-box;
-  -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+/* 本週主打卡的強調 — 與兩週內、主題分區做區隔（橘色 hover 邊框） */
+.small-card.has-progress:hover {
+  border-color: #fbd28a;
+  box-shadow: 0 4px 16px rgba(245,158,11,.16);
 }
-.list-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.list-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); }
-.list-meta .sep { color: var(--line); }
-.list-meta .pts { font-weight: 700; color: var(--text); }
-
-/* ══════════════════════════════════════════
-   桌機 卡片 Grid（≥ 768px）
-   ══════════════════════════════════════════ */
-.card-grid { display: none; }
-
 @media (min-width: 768px) {
-  .list-view { display: none; }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
+  .small-card.has-progress:hover {
+    box-shadow: 0 6px 22px rgba(245,158,11,.18);
   }
 }
 
-@media (min-width: 1100px) {
-  .card-grid { grid-template-columns: repeat(4, 1fr); }
+/* ════════════════════════════════════════
+   小卡（兩週內、主題分區、特找積分共用）
+   - 手機（< 768px）：list-item 風格 — 左縮圖 110×82 + 右資訊
+   - 桌機（≥ 768px）：course-card 風格 — 16:9 大圖 + 深色 header + footer
+   ════════════════════════════════════════ */
+.small-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
-.course-card {
+/* ── 預設：手機 list-item 風格 ── */
+.small-card {
   background: var(--card-bg);
   border: 1px solid var(--line);
   border-radius: 12px;
-  overflow: hidden;
-  display: flex; flex-direction: column;
-  transition: box-shadow .18s, transform .18s, border-color .18s;
-  text-decoration: none; color: inherit;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  padding: 12px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  transition: box-shadow .15s, border-color .15s;
 }
-.course-card:hover {
-  box-shadow: 0 6px 24px rgba(37,99,235,.12);
-  transform: translateY(-3px);
-  border-color: #93c5fd;
-}
-.course-card.is-expired { opacity: .6; }
-
-/* 縮圖區 */
-.card-thumb {
-  width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
-  background: var(--thumb-placeholder);
-  position: relative; flex-shrink: 0;
-}
-.card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* 占位圖：漸層 + 圖示 */
-.card-thumb .thumb-placeholder {
-  width: 100%; height: 100%;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 6px;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-  color: rgba(255,255,255,.45); font-size: 1.8rem;
+.small-card:hover {
+  color: inherit;
+  box-shadow: 0 4px 16px rgba(36,141,197,.10);
+  border-color: #bcdcef;
 }
 
-/* 卡片 Header（深色，仿 gc-card-header） */
-.card-header {
-  background: #1e293b;
-  padding: 8px 14px;
-  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+.small-thumb {
   flex-shrink: 0;
+  width: 110px;
+  height: 82px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--thumb-placeholder);
+  position: relative;
 }
-.card-header-deadline {
-  font-size: .78rem; color: rgba(255,255,255,.65);
-  display: flex; align-items: center; gap: 4px;
-}
-.card-header-deadline strong { color: #fff; font-weight: 700; }
-
-/* 卡片主體 */
-.card-body {
-  padding: 12px 14px; flex: 1;
-  display: flex; flex-direction: column; gap: 7px;
-}
-.card-title {
-  font-size: .9rem; font-weight: 700; line-height: 1.45;
-  color: var(--text); display: -webkit-box;
-  -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.card-meta {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-  font-size: .78rem; color: var(--muted); margin-top: auto;
-}
-.card-meta .pts { font-weight: 700; color: var(--text); }
-
-/* 卡片底部 */
-.card-footer {
-  padding: 10px 14px; border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
-}
-.btn-goto {
-  background: var(--primary); color: #fff;
-  border: none; border-radius: 8px;
-  padding: 6px 14px; font-size: .82rem; font-weight: 600;
-  text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-  transition: background .15s;
-  white-space: nowrap;
-}
-.btn-goto:hover { background: var(--primary-dark); color: #fff; }
-.btn-goto-disabled {
-  background: #f1f5f9; color: var(--muted);
-  border-radius: 8px; padding: 6px 14px;
-  font-size: .82rem; font-weight: 600; white-space: nowrap;
+.small-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.small-thumb .thumb-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-darker) 100%);
+  color: rgba(255,255,255,.5);
+  font-size: 1.4rem;
 }
 
-/* ── 截止日文字 ── */
-.deadline-text { font-size: .78rem; color: var(--muted); }
-.deadline-text strong { color: var(--text); font-weight: 700; }
+/* 手機不顯示桌機專用的 header / footer */
+.small-header,
+.small-footer { display: none; }
 
-/* ── 空狀態 ── */
+.small-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+}
+.small-title {
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.small-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.small-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: .8rem;
+  color: var(--ink-2);
+}
+.small-meta .pts { font-weight: 700; color: var(--ink); }
+.small-meta .sep { color: var(--line); }
+.small-meta .countdown-badge { font-size: 11px; padding: 2px 8px; }
+.small-meta-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* ── 桌機（≥ 768px）：切回 course-card 風格 ── */
+@media (min-width: 768px) {
+  .small-grid { gap: 18px; }
+
+  .small-card {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    transition: box-shadow .18s, transform .18s, border-color .18s;
+  }
+  .small-card:hover {
+    box-shadow: 0 6px 24px rgba(36,141,197,.12);
+    transform: translateY(-3px);
+    border-color: #93c5fd;
+  }
+
+  .small-thumb {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 0;
+  }
+  .small-thumb .thumb-placeholder { font-size: 1.8rem; }
+
+  /* 桌機才出現的深色 header */
+  .small-header {
+    display: flex;
+    background: var(--ink);
+    color: rgba(255,255,255,.85);
+    padding: 9px 14px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: .8rem;
+    flex-shrink: 0;
+  }
+  .small-header-deadline {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .small-header-deadline strong {
+    color: #fff;
+    font-weight: 800;
+    font-size: .92rem;
+    letter-spacing: .01em;
+  }
+
+  /* 桌機顯示 footer 含 CTA */
+  .small-footer {
+    display: flex;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+
+  /* 桌機 body：恢復內距與 margin-top 自動 */
+  .small-body {
+    padding: 12px 14px;
+    gap: 7px;
+    flex: 1;
+  }
+  .small-title {
+    font-size: .9rem;
+    min-height: 2.4em;
+  }
+  .small-meta {
+    font-size: .78rem;
+    margin-top: auto;
+  }
+  /* 桌機的截止日與倒數徽章在 header 顯示，meta 內隱藏 */
+  .small-meta .deadline-text,
+  .small-meta .sep,
+  .small-meta .countdown-badge { display: none; }
+}
+
+/* ════════════════════════════════════════
+   載入 / 空狀態
+   ════════════════════════════════════════ */
+.loading-state,
 .empty-state {
-  text-align: center; padding: 48px 16px; color: var(--muted);
-  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
 }
-.empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: .35; }
-
-/* ── 載入中 ── */
-.loading-state {
-  text-align: center; padding: 48px 16px; color: var(--muted);
-  grid-column: 1 / -1;
+.loading-state i,
+.empty-state i {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 10px;
+  opacity: .5;
+}
+.empty-state-mini {
+  background: #fff;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 18px 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
 }
 
-/* ── 已截止標籤 ── */
-.expired-label {
-  position: absolute; top: 8px; left: 8px;
-  background: rgba(0,0,0,.55); color: #fff;
-  font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 4px;
+/* ════════════════════════════════════════
+   頁尾
+   ════════════════════════════════════════ */
+.page-footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: .82rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.page-footer a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-weight: 700;
+}
+.page-footer a:hover { text-decoration: underline; }
+.page-footer .footer-update { margin-top: 6px; opacity: .85; }
+
+/* ════════════════════════════════════════
+   RWD：≥ 768px（平板）
+   ════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .page-wrap { padding: 0 24px 48px; }
+  .hero-countdown {
+    padding: 28px 28px;
+    margin: 20px 0 22px;
+  }
+  .hero-title { font-size: 28px; }
+  .hero-subtitle { font-size: 1rem; }
+  .hero-logo { height: 78px; max-height: 78px; }
+  .stat-card { padding: 16px 18px; }
+  .stat-card-value { font-size: 1.9rem; }
+
+  .urgent-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .urgent-card .urgent-thumb {
+    width: 360px;
+    aspect-ratio: 16 / 11;
+    flex-shrink: 0;
+  }
+  .urgent-card .urgent-body-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .urgent-body { padding: 18px 22px; }
+  .urgent-title { font-size: 1.15rem; }
+  .urgent-footer { padding: 14px 22px; }
+
+  .small-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  .section-block-title { font-size: 1.2rem; }
+  .group-title { font-size: 1.05rem; }
+}
+
+/* ════════════════════════════════════════
+   RWD：≥ 1100px（寬螢幕）
+   ════════════════════════════════════════ */
+@media (min-width: 1100px) {
+  .small-grid { grid-template-columns: repeat(4, 1fr); }
+  .hero-title { font-size: 32px; }
 }
 </style>
 </head>
@@ -378,97 +676,140 @@ body {
 <body>
 <div class="page-wrap" id="measure-wrapper">
 
-  <!-- 頁首 -->
-  <div class="page-header">
-    <div class="page-header-text">
-      <h1 class="page-title"><i class="fa-solid fa-laptop-medical"></i><span>網路課程看板</span></h1>
-      <p class="page-subtitle is-visually-hidden" id="update-time">資料載入中…</p>
-    </div>
-    <img
-      class="page-header-logo"
-      src="https://www.gogocare.com.tw/UserFiles/uploads/images/20260522165334_3906.jpg"
-      alt="GoGoCare"
-      loading="lazy"
-    >
-  </div>
-
-  <!-- 篩選提示 -->
-  <div class="filter-hint">
-    <i class="fa-solid fa-circle-info"></i>
-    <span>網路課程類別、截止日期快速篩選，幫你馬上找到最合適課程！</span>
-  </div>
-
-  <!-- 篩選面板 -->
-  <div class="filter-panel">
-    <!-- 手機折疊按鈕 -->
-    <button class="filter-toggle-btn" id="filterToggleBtn" type="button">
-      <i class="fa-solid fa-sliders me-1"></i> 篩選條件
-      <span class="filter-active-badge" id="filterActiveBadge" style="display:none;"></span>
-      <i class="fa-solid fa-chevron-down filter-chevron" id="filterChevron"></i>
-    </button>
-
-    <div class="filter-body" id="filterBody">
-      <!-- 積分主題（標籤由 JS 依 CAT_GROUPS 動態產生） -->
-      <div class="filter-group" id="themeGroup" style="display:none;">
-        <span class="filter-group-label">積分主題</span>
-        <div class="chip-row" id="themeChips"></div>
+  <!-- ════════════════════════════════════════
+       HERO 倒數狙擊區
+       ════════════════════════════════════════ -->
+  <section class="hero-countdown" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-head">
+        <div class="hero-text">
+          <span class="hero-eyebrow">
+            <i class="fa-solid fa-bullhorn"></i> 即將送審的積分
+          </span>
+          <h1 class="hero-title" id="hero-title">
+            <span class="hero-accent">5/31 送審倒數</span>網路課程精選
+          </h1>
+        </div>
+        <img
+          class="hero-logo"
+          src="https://www.gogocare.com.tw/UserFiles/uploads/images/20260522165334_3906.jpg"
+          alt="GoGoCare"
+          loading="lazy"
+        >
       </div>
 
-      <!-- 特找積分（標籤由 JS 依 CAT_GROUPS 動態產生） -->
-      <div class="filter-group" id="specialGroup" style="display:none;">
-        <span class="filter-group-label">特找積分</span>
-        <div class="chip-row" id="specialChips"></div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-card-icon"><i class="fa-solid fa-fire"></i></div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">截止倒數</div>
+            <div class="stat-card-value">
+              <span id="statTotalValue">—</span>
+              <span class="stat-card-unit">堂課程</span>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <!-- 截止月份（由 JS 動態產生） -->
-      <div class="filter-group" id="monthGroup">
-        <span class="filter-group-label">截止月份</span>
-        <div class="chip-row" id="monthChips"></div>
-      </div>
     </div>
+  </section>
+
+  <!-- 載入中狀態（首次顯示） -->
+  <div id="loadingState" class="loading-state">
+    <i class="fa-solid fa-spinner fa-spin"></i>資料載入中…
   </div>
 
-  <!-- 狀態列 -->
-  <div class="status-bar">
-    <span id="statusBar">載入中…</span>
-    <span>
-      <button class="chip" id="clearBtn" style="font-size:.78rem;padding:3px 12px;" type="button">
-        <i class="fa-solid fa-rotate-left me-1"></i>清除篩選
-      </button>
-    </span>
+  <!-- ════════════════════════════════════════
+       今日／48 小時急件區（days <= 2）
+       ════════════════════════════════════════ -->
+  <section class="section-block section-urgent" id="urgentToday" style="display:none;">
+    <h2 class="section-block-title">
+      <i class="fa-solid fa-bolt"></i>今日／48 小時內截止
+      <span class="pill" id="urgentTodayCount">0 門</span>
+    </h2>
+    <p class="section-block-sub">最後機會 · 紅色卡片代表已進入倒數階段</p>
+    <div class="urgent-list" id="urgentTodayList"></div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       本週主打區（3 ~ 7 天）
+       ════════════════════════════════════════ -->
+  <section class="section-block section-week" id="urgentWeek" style="display:none;">
+    <h2 class="section-block-title">
+      <i class="fa-regular fa-clock"></i>本週主打
+      <span class="pill" id="urgentWeekCount">0 門</span>
+    </h2>
+    <p class="section-block-sub">剩餘 3–7 天 · 把握報名時機</p>
+    <div class="small-grid" id="urgentWeekList"></div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       兩週內區（8 ~ 14 天）
+       ════════════════════════════════════════ -->
+  <section class="section-block section-fortnight" id="urgentFortnight" style="display:none;">
+    <h2 class="section-block-title">
+      <i class="fa-regular fa-calendar"></i>兩週內截止
+      <span class="pill" id="urgentFortnightCount">0 門</span>
+    </h2>
+    <div class="small-grid" id="urgentFortnightList"></div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       情境分區：積分主題（15 ~ 60 天）
+       ════════════════════════════════════════ -->
+  <section class="by-theme" id="byTheme"></section>
+
+  <!-- ════════════════════════════════════════
+       情境分區：特找積分（15 ~ 60 天）
+       ════════════════════════════════════════ -->
+  <section class="by-special" id="bySpecial"></section>
+
+  <!-- 全空時的提示 -->
+  <div class="empty-state-mini" id="globalEmpty" style="display:none;">
+    <i class="fa-regular fa-circle-check"></i>
+    目前接下來 60 天內沒有即將截止的網路課程，請持續關注。
   </div>
 
-  <!-- 手機清單視圖 -->
-  <div class="list-view" id="listView">
-    <div style="text-align:center;padding:40px;color:var(--muted);">
-      <i class="fa-solid fa-spinner fa-spin me-2"></i>資料載入中…
+  <!-- ════════════════════════════════════════
+       頁尾
+       ════════════════════════════════════════ -->
+  <footer class="page-footer">
+    <div>
+      本頁僅顯示接下來 五、六月份截止的網路課程，需要查看全部請至
+      <a href="https://www.gogocare.com.tw/tw/course/list.html" target="_blank" rel="noopener">GOGOCARE 課程總表</a>。
     </div>
-  </div>
-
-  <!-- 桌機卡片 Grid -->
-  <div class="card-grid" id="cardGrid">
-    <div class="loading-state">
-      <i class="fa-solid fa-spinner fa-spin me-2"></i>資料載入中…
-    </div>
-  </div>
+    <div class="footer-update" id="update-time">資料載入中…</div>
+  </footer>
 
 </div><!-- /page-wrap -->
 
 <script>
 /* ════════════════════════════════════════
-   設定區 — 請填入 Google Sheet 公開 CSV 網址
-   取得方式：Google Sheet → 檔案 → 共用 → 發布到網路
-            → 選「網路課程課表」工作表 → 格式選 CSV → 發布 → 複製網址
+   設定區
    ════════════════════════════════════════ */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQrhEmVBEEIZu172SGx2ZdQjxzP9IMXAlGGdPLCY2_-NjXFoHKX5d28pI6b8zZ6xzXslwDtokoPxuX2/pub?gid=1081455974&single=true&output=csv";
 
+/* 倒數窗口（天） — 只顯示這個窗口內快截止的課程 */
+const WINDOW_DAYS = 60;
+
+/* 與爬蟲分類保持一致 */
+const CAT_GROUPS = [
+  {
+    type: "theme",
+    label: "積分主題",
+    cats: ["專業課程", "專業品質", "專業倫理", "專業法規", "非積分課程", "積分申請中"]
+  },
+  {
+    type: "special",
+    label: "特找積分",
+    cats: ["感染管制", "緊急應變", "消防安全", "性別敏感度",
+           "原住民族文化敏感度及能力", "多元族群文化敏感度及能力", "其他"]
+  }
+];
+
 /* ════════════════════════════════════════
-   狀態變數
+   狀態
    ════════════════════════════════════════ */
 let db = [];
-let selectedThemes  = [];
-let selectedSpecial = [];
-let selectedMonths  = [];
 
 /* ════════════════════════════════════════
    工具函式
@@ -477,13 +818,12 @@ function escHtml(s) {
   return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-/* 解析多值欄位（支援逗號、頓號、斜線分隔） */
 function parseMulti(raw) {
   if (!raw) return [];
   return String(raw).split(/[,，、\/／]/).map(s => s.trim()).filter(Boolean);
 }
 
-/* 計算距截止日的天數（今天 = 0，截止日含當天） */
+/* 距截止日剩餘天數（今天=0，含當天，已過為負） */
 function daysLeft(dateStr) {
   if (!dateStr) return null;
   const d = new Date(String(dateStr).trim());
@@ -493,44 +833,22 @@ function daysLeft(dateStr) {
   return Math.ceil(diff / 86400000);
 }
 
-/* 建立倒數徽章 HTML */
-function buildCountdownBadge(days) {
-  if (days === null) return "";
-  if (days < 0) return '<span class="countdown-badge countdown-expired"><i class="fa-regular fa-clock"></i> 已截止</span>';
-  if (days === 0) return '<span class="countdown-badge countdown-urgent"><i class="fa-solid fa-fire"></i> 今天截止</span>';
-  if (days <= 3)  return '<span class="countdown-badge countdown-urgent"><i class="fa-solid fa-fire"></i> 剩 ' + days + ' 天</span>';
-  if (days <= 7)  return '<span class="countdown-badge countdown-warn"><i class="fa-regular fa-clock"></i> 剩 ' + days + ' 天</span>';
-  return '<span class="countdown-badge countdown-ok"><i class="fa-regular fa-clock"></i> 剩 ' + days + ' 天</span>';
+/* 距截止日剩餘小時數（用於急件區「剩 X 天 Y 小時」） */
+function hoursLeft(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(String(dateStr).trim());
+  if (isNaN(d)) return null;
+  d.setHours(23, 59, 59, 0);
+  const diff = d - new Date();
+  return Math.max(0, Math.ceil(diff / 3600000));
 }
 
-/* 建立積分主題標籤 */
-function buildThemeTags(themes) {
-  return themes.map(t =>
-    '<span class="tag-theme">' + escHtml(t) + '</span>'
-  ).join("");
+/* 是否落在倒數窗口內 */
+function withinWindow(row) {
+  const d = daysLeft(row["課程截止日"]);
+  return d !== null && d >= 0 && d <= WINDOW_DAYS;
 }
 
-/* 建立特殊積分標籤 */
-function buildSpecialTags(specials) {
-  return specials.map(s =>
-    '<span class="tag-special">' + escHtml(s) + '</span>'
-  ).join("");
-}
-
-/* 縮圖 onerror 處理（獨立函式避免 HTML 屬性引號衝突） */
-function onThumbError(img) {
-  img.parentNode.innerHTML = '<div class="thumb-placeholder"><i class="fa-solid fa-book-open"></i></div>';
-}
-
-/* 縮圖 HTML（有圖用圖，無圖用占位） */
-function buildThumb(url, title) {
-  if (url && url.toLowerCase().startsWith("http")) {
-    return '<img src="' + escHtml(url) + '" alt="' + escHtml(title) + '" loading="lazy" onerror="onThumbError(this)">';
-  }
-  return '<div class="thumb-placeholder"><i class="fa-solid fa-book-open"></i></div>';
-}
-
-/* 截止日格式化顯示 */
 function fmtDeadline(dateStr) {
   if (!dateStr) return "";
   const d = new Date(String(dateStr).trim());
@@ -540,295 +858,336 @@ function fmtDeadline(dateStr) {
     String(d.getDate()).padStart(2,"0");
 }
 
-/* ════════════════════════════════════════
-   篩選邏輯
-   ════════════════════════════════════════ */
-function filterData() {
-  return db.filter(row => {
-    /* 截止月份篩選（多選 OR，key 格式：YYYY-M） */
-    if (selectedMonths.length) {
-      const d = row["課程截止日"];
-      if (!d) return false;
-      const date = new Date(String(d).trim());
-      if (isNaN(date)) return false;
-      const key = date.getFullYear() + "-" + (date.getMonth() + 1);
-      if (!selectedMonths.includes(key)) return false;
-    }
-
-    /* 積分主題篩選（多選 OR） */
-    if (selectedThemes.length) {
-      const rowThemes = parseMulti(row["積分主題"]);
-      if (!selectedThemes.some(t => rowThemes.includes(t))) return false;
-    }
-
-    /* 特找積分篩選（多選 OR） */
-    if (selectedSpecial.length) {
-      const rowSpecial = parseMulti(row["特殊積分"]);
-      if (!selectedSpecial.some(s => rowSpecial.includes(s))) return false;
-    }
-
-    return true;
-  });
+function onThumbError(img) {
+  img.parentNode.innerHTML = '<div class="thumb-placeholder"><i class="fa-solid fa-book-open"></i></div>';
 }
 
-/* ════════════════════════════════════════
-   渲染
-   ════════════════════════════════════════ */
-function render() {
-  let list = filterData();
-
-  /* 排序：剩餘天數小的優先；已截止排最後 */
-  list.sort((a, b) => {
-    const da = daysLeft(a["課程截止日"]);
-    const db_ = daysLeft(b["課程截止日"]);
-    if (da === null && db_ === null) return 0;
-    if (da === null) return 1;
-    if (db_ === null) return -1;
-    /* 已截止排後面 */
-    if (da < 0 && db_ >= 0) return 1;
-    if (da >= 0 && db_ < 0) return -1;
-    return da - db_;
-  });
-
-  document.getElementById("statusBar").innerHTML =
-    '共 <span class="status-count">' + list.length + '</span> 門課程';
-
-  renderList(list);
-  renderCards(list);
-  updateFilterBadge();
-}
-
-/* ── 手機清單 ── */
-function renderList(list) {
-  if (!list.length) {
-    document.getElementById("listView").innerHTML =
-      '<div class="empty-state"><i class="fa-regular fa-folder-open"></i>沒有符合條件的課程</div>';
-    return;
+function buildThumb(url, title) {
+  if (url && url.toLowerCase().startsWith("http")) {
+    return '<img src="' + escHtml(url) + '" alt="' + escHtml(title) + '" loading="lazy" onerror="onThumbError(this)">';
   }
-
-  document.getElementById("listView").innerHTML = list.map(row => {
-    const name     = row["課程名稱"] || "";
-    const link     = row["連結"] || "";
-    const pts      = row["課程積分"] || "";
-    const deadline = row["課程截止日"] || "";
-    const thumbUrl = row["縮圖URL"] || "";
-    const themes   = parseMulti(row["積分主題"]);
-    const specials = parseMulti(row["特殊積分"]);
-    const days     = daysLeft(deadline);
-    const expired  = days !== null && days < 0;
-
-    const tagHtml  = buildThemeTags(themes) + buildSpecialTags(specials);
-    const badgeHtml = buildCountdownBadge(days);
-    const deadlineHtml = deadline
-      ? '<span class="deadline-text">截止 <strong>' + fmtDeadline(deadline) + '</strong></span>'
-      : "";
-
-    const href = link.toLowerCase().startsWith("http") ? escHtml(link) : "#";
-    const target = link.toLowerCase().startsWith("http") ? ' target="_blank" rel="noopener"' : "";
-
-    return '<a href="' + href + '"' + target + ' class="list-item' + (expired ? " is-expired" : "") + '">' +
-      '<div class="list-thumb">' + buildThumb(thumbUrl, name) + '</div>' +
-      '<div class="list-info">' +
-        '<div class="list-title">' + escHtml(name) + '</div>' +
-        (tagHtml ? '<div class="list-tags">' + tagHtml + '</div>' : '') +
-        '<div class="list-meta">' +
-          (pts ? '<span class="pts"><i class="fa-solid fa-star" style="color:#f59e0b;font-size:.72rem;"></i> ' + escHtml(pts) + ' 積分</span>' : '') +
-          (pts && deadline ? '<span class="sep">·</span>' : '') +
-          deadlineHtml +
-        '</div>' +
-        (badgeHtml ? '<div>' + badgeHtml + '</div>' : '') +
-      '</div>' +
-    '</a>';
-  }).join("");
+  return '<div class="thumb-placeholder"><i class="fa-solid fa-book-open"></i></div>';
 }
 
-/* ── 桌機卡片 Grid ── */
-function renderCards(list) {
-  if (!list.length) {
-    document.getElementById("cardGrid").innerHTML =
-      '<div class="empty-state"><i class="fa-regular fa-folder-open"></i>沒有符合條件的課程</div>';
-    return;
-  }
+function buildThemeTags(themes) {
+  return themes.map(t => '<span class="tag-theme">' + escHtml(t) + '</span>').join("");
+}
+function buildSpecialTags(specials) {
+  return specials.map(s => '<span class="tag-special">' + escHtml(s) + '</span>').join("");
+}
 
-  document.getElementById("cardGrid").innerHTML = list.map(row => {
-    const name     = row["課程名稱"] || "";
-    const link     = row["連結"] || "";
-    const pts      = row["課程積分"] || "";
-    const deadline = row["課程截止日"] || "";
-    const thumbUrl = row["縮圖URL"] || "";
-    const themes   = parseMulti(row["積分主題"]);
-    const specials = parseMulti(row["特殊積分"]);
-    const days     = daysLeft(deadline);
-    const expired  = days !== null && days < 0;
+/* 倒數徽章（依剩餘天數分色） */
+function buildCountdownBadge(days) {
+  if (days === null) return "";
+  if (days < 0)  return '<span class="countdown-badge countdown-urgent"><i class="fa-regular fa-clock"></i> 已截止</span>';
+  if (days === 0) return '<span class="countdown-badge countdown-urgent"><i class="fa-solid fa-fire"></i> 今天截止</span>';
+  if (days <= 3)  return '<span class="countdown-badge countdown-urgent"><i class="fa-solid fa-fire"></i> 剩 ' + days + ' 天</span>';
+  if (days <= 7)  return '<span class="countdown-badge countdown-warn"><i class="fa-regular fa-clock"></i> 剩 ' + days + ' 天</span>';
+  return '<span class="countdown-badge countdown-ok"><i class="fa-regular fa-clock"></i> 剩 ' + days + ' 天</span>';
+}
 
-    const tagHtml  = buildThemeTags(themes) + buildSpecialTags(specials);
-    const badgeHtml = buildCountdownBadge(days);
-    const deadlineHtml = deadline
-      ? '<span class="deadline-text">截止 <strong>' + fmtDeadline(deadline) + '</strong></span>'
-      : "";
+/* 連結與 target 處理 */
+function linkAttrs(link) {
+  const isHttp = link && link.toLowerCase().startsWith("http");
+  return {
+    href: isHttp ? escHtml(link) : "#",
+    target: isHttp ? ' target="_blank" rel="noopener"' : "",
+    valid: isHttp
+  };
+}
 
-    const href = link.toLowerCase().startsWith("http") ? escHtml(link) : "#";
-    const target = link.toLowerCase().startsWith("http") ? ' target="_blank" rel="noopener"' : "";
-    const gotoBtn = link.toLowerCase().startsWith("http")
-      ? '<a href="' + href + '"' + target + ' class="btn-goto"><i class="fa-solid fa-arrow-up-right-from-square"></i> 前往課程</a>'
-      : '<span class="btn-goto-disabled">連結未設定</span>';
+/* CTA 視覺按鈕（純 <span>，避免巢狀 <a>） */
+function buildCtaHtml(valid, label, large) {
+  if (!valid) return '<span class="btn-goto-disabled">連結未設定</span>';
+  const cls = 'btn-goto' + (large ? ' btn-goto-large' : '');
+  return '<span class="' + cls + '"><i class="fa-solid fa-arrow-up-right-from-square"></i> ' + label + '</span>';
+}
 
-    return '<div class="course-card' + (expired ? " is-expired" : "") + '">' +
-      '<div class="card-thumb">' +
+/* 「剩 X 天 Y 小時」文字（急件區用） */
+function buildHoursLeftText(deadline) {
+  const h = hoursLeft(deadline);
+  if (h === null) return "";
+  if (h <= 0) return '<i class="fa-solid fa-hourglass-end"></i> 已截止';
+  const d = Math.floor(h / 24);
+  const r = h % 24;
+  if (d > 0) return '<i class="fa-solid fa-hourglass-half"></i> 剩 ' + d + ' 天 ' + r + ' 小時';
+  return '<i class="fa-solid fa-hourglass-half"></i> 剩 ' + r + ' 小時';
+}
+
+/* ════════════════════════════════════════
+   各種卡片建構
+   ════════════════════════════════════════ */
+function buildUrgentCard(row) {
+  const name     = row["課程名稱"] || "";
+  const link     = row["連結"] || "";
+  const pts      = row["課程積分"] || "";
+  const deadline = row["課程截止日"] || "";
+  const thumbUrl = row["縮圖URL"] || "";
+  const themes   = parseMulti(row["積分主題"]);
+  const specials = parseMulti(row["特殊積分"]);
+
+  const tagHtml = buildThemeTags(themes) + buildSpecialTags(specials);
+  const la = linkAttrs(link);
+  const hoursTxt = buildHoursLeftText(deadline);
+
+  const cta = buildCtaHtml(la.valid, '立即報名', true);
+
+  return (
+    '<a href="' + la.href + '"' + la.target + ' class="urgent-card">' +
+      '<div class="urgent-thumb">' +
         buildThumb(thumbUrl, name) +
-        (expired ? '<span class="expired-label">已截止</span>' : '') +
+        '<span class="urgent-flag"><i class="fa-solid fa-fire"></i> 最後機會</span>' +
       '</div>' +
-      '<div class="card-header">' +
-        '<span class="card-header-deadline">' +
-          '<i class="fa-regular fa-calendar"></i>' +
-          (deadline ? '截止 <strong>' + fmtDeadline(deadline) + '</strong>' : '<span style="opacity:.5">無截止日</span>') +
-        '</span>' +
-        (badgeHtml ? badgeHtml : '') +
-      '</div>' +
-      '<div class="card-body">' +
-        '<div class="card-title">' + escHtml(name) + '</div>' +
-        (tagHtml ? '<div class="card-tags">' + tagHtml + '</div>' : '') +
-        '<div class="card-meta">' +
-          (pts ? '<span class="pts"><i class="fa-solid fa-star" style="color:#f59e0b;font-size:.72rem;"></i> ' + escHtml(pts) + ' 積分</span>' : '') +
+      '<div class="urgent-body-wrap">' +
+        '<div class="urgent-body">' +
+          '<div class="urgent-title">' + escHtml(name) + '</div>' +
+          (tagHtml ? '<div class="urgent-tags">' + tagHtml + '</div>' : '') +
+          (hoursTxt ? '<div class="urgent-hours">' + hoursTxt + '</div>' : '') +
+          '<div class="urgent-meta">' +
+            (pts ? '<span class="pts"><i class="fa-solid fa-star" style="color:var(--warn);font-size:.78rem;"></i> ' + escHtml(pts) + ' 積分</span>' : '') +
+            (pts && deadline ? '<span class="sep">·</span>' : '') +
+            (deadline ? '<span class="deadline-text">截止 <strong>' + fmtDeadline(deadline) + '</strong></span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="urgent-footer">' +
+          '<span class="deadline-text"><i class="fa-regular fa-calendar"></i> ' + (deadline ? fmtDeadline(deadline) : '無截止日') + '</span>' +
+          cta +
         '</div>' +
       '</div>' +
-      '<div class="card-footer">' +
-        gotoBtn +
-      '</div>' +
+    '</a>'
+  );
+}
+
+function buildWeekCard(row) {
+  const name     = row["課程名稱"] || "";
+  const link     = row["連結"] || "";
+  const pts      = row["課程積分"] || "";
+  const deadline = row["課程截止日"] || "";
+  const thumbUrl = row["縮圖URL"] || "";
+  const themes   = parseMulti(row["積分主題"]);
+  const specials = parseMulti(row["特殊積分"]);
+  const days     = daysLeft(deadline);
+
+  const tagHtml = buildThemeTags(themes) + buildSpecialTags(specials);
+  const la = linkAttrs(link);
+  const badgeHtml = buildCountdownBadge(days);
+  const deadlineTxt = deadline ? fmtDeadline(deadline) : '';
+
+  const cta = buildCtaHtml(la.valid, '立即報名', false);
+
+  /* 桌機 header：截止日 + 倒數徽章 */
+  const headerHtml =
+    '<div class="small-header">' +
+      '<span class="small-header-deadline">' +
+        '<i class="fa-regular fa-calendar"></i>' +
+        (deadlineTxt ? '截止 <strong>' + deadlineTxt + '</strong>' : '<span style="opacity:.5">無截止日</span>') +
+      '</span>' +
+      (badgeHtml || '') +
     '</div>';
+
+  const footerHtml = '<div class="small-footer">' + cta + '</div>';
+
+  const metaHtml =
+    '<div class="small-meta">' +
+      (pts ? '<span class="pts"><i class="fa-solid fa-star" style="color:var(--warn);font-size:.72rem;"></i> ' + escHtml(pts) + ' 積分</span>' : '') +
+      (pts && deadlineTxt ? '<span class="sep">·</span>' : '') +
+      (deadlineTxt ? '<span class="deadline-text">截止 <strong>' + deadlineTxt + '</strong></span>' : '') +
+      (badgeHtml ? badgeHtml : '') +
+    '</div>';
+
+  return (
+    '<a href="' + la.href + '"' + la.target + ' class="small-card has-progress">' +
+      '<div class="small-thumb">' + buildThumb(thumbUrl, name) + '</div>' +
+      headerHtml +
+      '<div class="small-body">' +
+        '<div class="small-title">' + escHtml(name) + '</div>' +
+        (tagHtml ? '<div class="small-tags">' + tagHtml + '</div>' : '') +
+        metaHtml +
+      '</div>' +
+      footerHtml +
+    '</a>'
+  );
+}
+
+function buildSmallCard(row) {
+  const name     = row["課程名稱"] || "";
+  const link     = row["連結"] || "";
+  const pts      = row["課程積分"] || "";
+  const deadline = row["課程截止日"] || "";
+  const thumbUrl = row["縮圖URL"] || "";
+  const themes   = parseMulti(row["積分主題"]);
+  const specials = parseMulti(row["特殊積分"]);
+  const days     = daysLeft(deadline);
+
+  const tagHtml = buildThemeTags(themes) + buildSpecialTags(specials);
+  const la = linkAttrs(link);
+  const badgeHtml = buildCountdownBadge(days);
+  const deadlineTxt = deadline ? fmtDeadline(deadline) : '';
+
+  const cta = buildCtaHtml(la.valid, '前往報名', false);
+
+  /* 桌機才顯示的深色 header：左截止日 + 右倒數徽章 */
+  const headerHtml =
+    '<div class="small-header">' +
+      '<span class="small-header-deadline">' +
+        '<i class="fa-regular fa-calendar"></i>' +
+        (deadlineTxt ? '截止 <strong>' + deadlineTxt + '</strong>' : '<span style="opacity:.5">無截止日</span>') +
+      '</span>' +
+      (badgeHtml || '') +
+    '</div>';
+
+  /* 桌機 footer：右側 CTA */
+  const footerHtml = '<div class="small-footer">' + cta + '</div>';
+
+  /* 手機 meta 區：積分 · 截止 + 倒數徽章（桌機透過 CSS 隱藏 deadline/sep/countdown） */
+  const metaHtml =
+    '<div class="small-meta">' +
+      (pts ? '<span class="pts"><i class="fa-solid fa-star" style="color:var(--warn);font-size:.72rem;"></i> ' + escHtml(pts) + ' 積分</span>' : '') +
+      (pts && deadlineTxt ? '<span class="sep">·</span>' : '') +
+      (deadlineTxt ? '<span class="deadline-text">截止 <strong>' + deadlineTxt + '</strong></span>' : '') +
+      (badgeHtml ? badgeHtml : '') +
+    '</div>';
+
+  return (
+    '<a href="' + la.href + '"' + la.target + ' class="small-card">' +
+      '<div class="small-thumb">' + buildThumb(thumbUrl, name) + '</div>' +
+      headerHtml +
+      '<div class="small-body">' +
+        '<div class="small-title">' + escHtml(name) + '</div>' +
+        (tagHtml ? '<div class="small-tags">' + tagHtml + '</div>' : '') +
+        metaHtml +
+      '</div>' +
+      footerHtml +
+    '</a>'
+  );
+}
+
+/* ════════════════════════════════════════
+   各區渲染
+   ════════════════════════════════════════ */
+function sortByDaysAsc(list) {
+  return list.slice().sort((a, b) => {
+    const da = daysLeft(a["課程截止日"]);
+    const dbv = daysLeft(b["課程截止日"]);
+    if (da === null && dbv === null) return 0;
+    if (da === null) return 1;
+    if (dbv === null) return -1;
+    return da - dbv;
+  });
+}
+
+function renderHero(list) {
+  document.getElementById("statTotalValue").textContent = list.length;
+}
+
+function renderUrgentToday(list) {
+  const sub = sortByDaysAsc(list.filter(r => {
+    const d = daysLeft(r["課程截止日"]);
+    return d !== null && d >= 0 && d <= 2;
+  }));
+  const sec = document.getElementById("urgentToday");
+  const wrap = document.getElementById("urgentTodayList");
+  const count = document.getElementById("urgentTodayCount");
+  if (!sub.length) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  count.textContent = sub.length + " 門";
+  wrap.innerHTML = sub.map(buildUrgentCard).join("");
+}
+
+function renderUrgentWeek(list) {
+  const sub = sortByDaysAsc(list.filter(r => {
+    const d = daysLeft(r["課程截止日"]);
+    return d !== null && d >= 3 && d <= 7;
+  }));
+  const sec = document.getElementById("urgentWeek");
+  const wrap = document.getElementById("urgentWeekList");
+  const count = document.getElementById("urgentWeekCount");
+  if (!sub.length) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  count.textContent = sub.length + " 門";
+  wrap.innerHTML = sub.map(buildWeekCard).join("");
+}
+
+function renderUrgentFortnight(list) {
+  const sub = sortByDaysAsc(list.filter(r => {
+    const d = daysLeft(r["課程截止日"]);
+    return d !== null && d >= 8 && d <= 14;
+  }));
+  const sec = document.getElementById("urgentFortnight");
+  const wrap = document.getElementById("urgentFortnightList");
+  const count = document.getElementById("urgentFortnightCount");
+  if (!sub.length) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  count.textContent = sub.length + " 門";
+  wrap.innerHTML = sub.map(buildSmallCard).join("");
+}
+
+/* 情境分區共用：按指定欄位 + 分類清單分組 */
+function renderByGroup(list, group, containerId, iconClass) {
+  const container = document.getElementById(containerId);
+  const longList = list.filter(r => {
+    const d = daysLeft(r["課程截止日"]);
+    return d !== null && d >= 15 && d <= WINDOW_DAYS;
+  });
+  if (!longList.length) { container.innerHTML = ""; return; }
+
+  const field = group.type === "theme" ? "積分主題" : "特殊積分";
+
+  /* 為每個分類收集屬於它的課程 */
+  const buckets = group.cats.map(cat => {
+    const matched = longList.filter(r => parseMulti(r[field]).includes(cat));
+    return { cat: cat, list: sortByDaysAsc(matched) };
+  }).filter(b => b.list.length > 0);
+
+  if (!buckets.length) { container.innerHTML = ""; return; }
+
+  const html = buckets.map(b => {
+    const cards = b.list.map(buildSmallCard).join("");
+    return (
+      '<div class="section-block">' +
+        '<h3 class="group-title">' +
+          '<i class="' + iconClass + '"></i>' +
+          escHtml(b.cat) +
+          '<span class="group-count">' + b.list.length + ' 門</span>' +
+        '</h3>' +
+        '<div class="small-grid">' + cards + '</div>' +
+      '</div>'
+    );
   }).join("");
+
+  container.innerHTML = html;
+}
+
+function renderByTheme(list) {
+  renderByGroup(list, CAT_GROUPS[0], "byTheme", "fa-solid fa-graduation-cap");
+}
+
+function renderBySpecial(list) {
+  renderByGroup(list, CAT_GROUPS[1], "bySpecial", "fa-solid fa-star");
 }
 
 /* ════════════════════════════════════════
-   固定分類群組定義（與爬蟲分類保持一致）
+   主渲染入口
    ════════════════════════════════════════ */
-const CAT_GROUPS = [
-  {
-    id: "themeGroup", chipsId: "themeChips", type: "theme",
-    label: "積分主題",
-    cats: ["專業課程", "專業品質", "專業倫理", "專業法規", "非積分課程", "積分申請中"]
-  },
-  {
-    id: "specialGroup", chipsId: "specialChips", type: "special",
-    label: "特找積分",
-    cats: ["感染管制", "緊急應變", "消防安全", "性別敏感度",
-           "原住民族文化敏感度及能力", "多元族群文化敏感度及能力", "其他"]
-  }
-];
+function renderAll() {
+  const inWindow = db.filter(withinWindow);
 
-/* ════════════════════════════════════════
-   篩選 chip 初始化（固定分組，依資料有無加 dim 樣式）
-   ════════════════════════════════════════ */
-function setupFilters() {
-  /* 統計資料中實際出現的值 */
-  const inDataTheme   = new Set();
-  const inDataSpecial = new Set();
-  db.forEach(row => {
-    parseMulti(row["積分主題"]).forEach(t => inDataTheme.add(t));
-    parseMulti(row["特殊積分"]).forEach(s => inDataSpecial.add(s));
-  });
+  renderHero(inWindow);
+  renderUrgentToday(inWindow);
+  renderUrgentWeek(inWindow);
+  renderUrgentFortnight(inWindow);
+  renderByTheme(inWindow);
+  renderBySpecial(inWindow);
 
-  CAT_GROUPS.forEach(group => {
-    const inData = group.type === "theme" ? inDataTheme : inDataSpecial;
-    document.getElementById(group.id).style.display = "";
-    document.getElementById(group.chipsId).innerHTML = group.cats.map(cat => {
-      const hasData = inData.has(cat);
-      return '<div class="chip' +
-        (group.type === "special" ? " chip-special" : "") +
-        (hasData ? "" : " chip-empty") +
-        '" data-type="' + group.type + '" data-val="' + escHtml(cat) + '" title="' +
-        escHtml(cat) + (hasData ? "" : "（目前無資料）") + '">' +
-        escHtml(cat) + '</div>';
-    }).join("");
-  });
-
-  /* 截止月份 chips（動態從資料萃取，key 格式：YYYY-M） */
-  const monthCount = new Map();
-  db.forEach(row => {
-    const d = row["課程截止日"];
-    if (!d) return;
-    const date = new Date(String(d).trim());
-    if (!isNaN(date)) {
-      const key = date.getFullYear() + "-" + (date.getMonth() + 1);
-      monthCount.set(key, (monthCount.get(key) || 0) + 1);
-    }
-  });
-  document.getElementById("monthChips").innerHTML =
-    Array.from(monthCount.keys())
-      .sort((a, b) => {
-        const [ay, am] = a.split("-").map(Number);
-        const [by, bm] = b.split("-").map(Number);
-        return ay !== by ? ay - by : am - bm;
-      })
-      .map(key => {
-        const [y, m] = key.split("-");
-        return '<div class="chip chip-month" data-type="month" data-val="' + key + '">' +
-          y + '/' + m + '月 <span class="chip-count">(' + monthCount.get(key) + ')</span></div>';
-      }).join("");
-
-  /* 所有 chip 事件 */
-  document.querySelectorAll(".chip[data-type]").forEach(el => {
-    el.addEventListener("click", () => {
-      const type = el.getAttribute("data-type");
-      const val  = el.getAttribute("data-val");
-
-      if (type === "month") {
-        toggleArr(selectedMonths, val);
-        el.classList.toggle("active");
-
-      } else if (type === "theme") {
-        toggleArr(selectedThemes, val);
-        el.classList.toggle("active");
-
-      } else if (type === "special") {
-        toggleArr(selectedSpecial, val);
-        el.classList.toggle("active");
-      }
-
-      render();
-    });
-  });
-
-  /* 清除按鈕 */
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    selectedThemes  = [];
-    selectedSpecial = [];
-    selectedMonths  = [];
-    document.querySelectorAll(".chip[data-type]").forEach(c => c.classList.remove("active"));
-    render();
-  });
-}
-
-function toggleArr(arr, val) {
-  const i = arr.indexOf(val);
-  if (i > -1) arr.splice(i, 1); else arr.push(val);
-}
-
-/* ── 更新篩選徽章 ── */
-function updateFilterBadge() {
-  const total = selectedThemes.length + selectedSpecial.length + selectedMonths.length;
-  const badge = document.getElementById("filterActiveBadge");
-  badge.textContent = total;
-  badge.style.display = total > 0 ? "" : "none";
-}
-
-/* ── 手機折疊 ── */
-function initFilterToggle() {
-  const btn  = document.getElementById("filterToggleBtn");
-  const body = document.getElementById("filterBody");
-  const chev = document.getElementById("filterChevron");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const open = body.classList.toggle("is-open");
-    chev.classList.toggle("is-open", open);
-  });
+  /* 全空提示 */
+  document.getElementById("globalEmpty").style.display = inWindow.length ? "none" : "";
+  document.getElementById("loadingState").style.display = "none";
 }
 
 /* ════════════════════════════════════════
    資料載入
    ════════════════════════════════════════ */
 function init() {
-  /* 更新時間 */
   const now = new Date();
   document.getElementById("update-time").textContent =
     "最後更新：" + now.getFullYear() + "/" +
@@ -837,14 +1196,11 @@ function init() {
     String(now.getHours()).padStart(2,"0") + ":" +
     String(now.getMinutes()).padStart(2,"0");
 
-  initFilterToggle();
-
   Papa.parse(CSV_URL, {
     download: true,
     header: true,
     skipEmptyLines: true,
     complete(res) {
-      /* 清洗欄位名（移除換行符號）*/
       const rows = res.data.map(row => {
         const clean = {};
         Object.keys(row).forEach(k => {
@@ -852,21 +1208,14 @@ function init() {
         });
         return clean;
       });
-
       db = rows.filter(row => row["課程名稱"]);
-      setupFilters();
-      render();
+      renderAll();
     },
     error(err) {
-      const errHtml =
-        '<div class="empty-state">' +
+      document.getElementById("loadingState").innerHTML =
         '<i class="fa-solid fa-triangle-exclamation"></i>' +
         '<div>CSV 載入失敗，請確認網址設定或 Sheet 是否已公開發布</div>' +
-        '<small style="font-size:.78rem;margin-top:6px;display:block;">' + escHtml(err.message || String(err)) + '</small>' +
-        '</div>';
-      document.getElementById("listView").innerHTML = errHtml;
-      document.getElementById("cardGrid").innerHTML = errHtml;
-      document.getElementById("statusBar").textContent = "載入失敗";
+        '<small style="font-size:.78rem;margin-top:6px;display:block;">' + escHtml(err.message || String(err)) + '</small>';
       document.getElementById("update-time").textContent = "資料載入失敗";
     }
   });
@@ -877,108 +1226,21 @@ document.addEventListener("DOMContentLoaded", init);
 
 <!--
   ═══════════════════════════════════════════════════════════════════════
-  【資料來源設定說明】
-  此頁面使用 Google Sheet 公開 CSV 取得資料（速度快，無冷啟動問題）。
-
-  CSV 網址取得步驟：
-  1. 開啟 Google Sheet → 上方選單「檔案」→「共用」→「發布到網路」
-  2. 左側下拉選「網路課程課表」工作表
-  3. 右側下拉選「逗號分隔值 (.csv)」
-  4. 點「發布」→ 複製產生的網址
-  5. 貼入上方 CSV_URL 常數（取代 YOUR_SHEET_ID / YOUR_GID）
-
-  ───────────────────────────────────────────────────────────────────────
-  GOOGLE APPS SCRIPT 程式碼（僅供 fetchThumbnails 寫回縮圖使用）
-  請開啟 Google Sheet → 擴充功能 → Apps Script，貼入 AppScript.gs 內容。
-  此檔案已移除 doGet()，只需保留 fetchThumbnails() 和 clearThumbnails()。
-
-  【Google Sheet 欄位結構（第 1 列為標題）】
-  A: 連結        — 課程頁面 URL（https://...）
-  B: 課程名稱    — 完整課程名稱
-  C: 課程積分    — 數字（例如：1）
-  D: 課程截止日  — 日期（格式：YYYY-MM-DD）
-  E: 送審倒數    — 保留欄位（前端不使用，可由爬蟲填入）
-  F: 積分主題    — 文字，多值以逗號分隔（例如：護理,長照）
-  G: 特殊積分    — 文字，多值以逗號分隔（例如：必修）
-  H: 縮圖URL     — 課程封面圖片 URL（由 fetchThumbnails() 自動填入）
+  【資料來源】
+  此頁面與「網路課程.html」共用同一份 Google Sheet 公開 CSV（網路課程課表），
+  欄位結構：
+    A: 連結  B: 課程名稱  C: 課程積分  D: 課程截止日
+    E: 送審倒數  F: 積分主題  G: 特殊積分  H: 縮圖URL
   ═══════════════════════════════════════════════════════════════════════
-
-  // ── doGet：回傳課程清單 JSON ──
-  function doGet(e) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data  = sheet.getDataRange().getValues();
-    var headers = data[0].map(function(h) {
-      return String(h).replace(/[\r\n]+/g, "").trim();
-    });
-
-    var rows = data.slice(1)
-      .filter(function(row) { return row.some(function(c) { return c !== ""; }); })
-      .map(function(row) {
-        var obj = {};
-        headers.forEach(function(h, i) {
-          obj[h] = (row[i] !== undefined && row[i] !== null) ? String(row[i]).trim() : "";
-        });
-        return obj;
-      })
-      .filter(function(obj) { return obj["課程名稱"]; });
-
-    var output = ContentService.createTextOutput(JSON.stringify(rows));
-    output.setMimeType(ContentService.MimeType.JSON);
-    return output;
-  }
-
-  // ── fetchThumbnails：抓取 OG 圖片並快取到 H 欄 ──
-  // 排程：每天執行一次（或手動在 Apps Script 觸發）
-  function fetchThumbnails() {
-    var sheet   = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data    = sheet.getDataRange().getValues();
-    var headers = data[0].map(function(h) { return String(h).trim(); });
-
-    var linkIdx  = headers.indexOf("連結");
-    var thumbIdx = headers.indexOf("縮圖URL");
-
-    if (linkIdx < 0 || thumbIdx < 0) {
-      Logger.log("找不到「連結」或「縮圖URL」欄位，請確認 Sheet 標題");
-      return;
-    }
-
-    for (var i = 1; i < data.length; i++) {
-      var row   = data[i];
-      var url   = String(row[linkIdx] || "").trim();
-      var thumb = String(row[thumbIdx] || "").trim();
-
-      if (!url || thumb) continue;  // 已有縮圖或無連結 → 跳過
-
-      try {
-        var res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
-        var html = res.getContentText("UTF-8");
-        var match =
-          html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
-          html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-
-        if (match && match[1]) {
-          sheet.getRange(i + 1, thumbIdx + 1).setValue(match[1]);
-          Logger.log("Row " + (i+1) + " 縮圖已抓取：" + match[1]);
-        } else {
-          Logger.log("Row " + (i+1) + " 找不到 og:image");
-        }
-      } catch (err) {
-        Logger.log("Row " + (i+1) + " 抓取失敗：" + err.message);
-      }
-
-      Utilities.sleep(600);  // 每筆間隔 600ms，避免請求過快被封鎖
-    }
-  }
 -->
 
 <script>
-/* ================================================================
-   iframe 身高自動通報（參考 篩選器.html 的穩健作法）
-   重點：只測量 #measure-wrapper 的「實際底部位置」，
-         不用 document.body.scrollHeight，以避免「iframe 變高
-         → body 也被撐高 → 又回報更大高度」的無限增長迴圈。
+/* ════════════════════════════════════════
+   iframe 身高自動通報（沿用網路課程.html 的穩健作法）
+   只測量 #measure-wrapper 的「實際底部位置」，
+   避免「iframe 變高 → body 也被撐高 → 又回報更大高度」的無限增長迴圈。
    訊息格式：{ type: "EVENT_BOARD_RESIZE", height: <number> }
-   ================================================================ */
+   ════════════════════════════════════════ */
 (function () {
   if (window.self === window.top) return;
 
