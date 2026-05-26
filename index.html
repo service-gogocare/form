@@ -766,15 +766,15 @@ img { max-width: 100%; height: auto; display: block; }
   <!-- 全空時的提示 -->
   <div class="empty-state-mini" id="globalEmpty" style="display:none;">
     <i class="fa-regular fa-circle-check"></i>
-    目前接下來 60 天內沒有即將截止的網路課程，請持續關注。
+    <span id="globalEmptyText">目前沒有即將截止的網路課程，請持續關注。</span>
   </div>
 
   <!-- ════════════════════════════════════════
        頁尾
        ════════════════════════════════════════ -->
   <footer class="page-footer">
-    <div>
-      本頁僅顯示接下來 五、六月份截止的網路課程，需要查看全部請至
+    <div id="footerNote">
+      本頁僅顯示即將截止的網路課程，需要查看全部請至
       <a href="https://www.gogocare.com.tw/tw/course/list.html" target="_blank" rel="noopener">GOGOCARE 課程總表</a>。
     </div>
     <div class="footer-update" id="update-time">資料載入中…</div>
@@ -788,8 +788,15 @@ img { max-width: 100%; height: auto; display: block; }
    ════════════════════════════════════════ */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQrhEmVBEEIZu172SGx2ZdQjxzP9IMXAlGGdPLCY2_-NjXFoHKX5d28pI6b8zZ6xzXslwDtokoPxuX2/pub?gid=1081455974&single=true&output=csv";
 
-/* 倒數窗口（天） — 只顯示這個窗口內快截止的課程 */
-const WINDOW_DAYS = 60;
+/* 硬性截止日 — 整頁只顯示「課程截止日 ≤ END_DATE」的課程
+   需要延長/縮短時間範圍時，只改這一行即可（格式：YYYY-MM-DD） */
+const END_DATE = "2026-05-31";
+
+/* WINDOW_DAYS 自動由今天到 END_DATE 的天數推算（含當天，最小為 0） */
+const WINDOW_DAYS = (function () {
+  const d = new Date(END_DATE + "T23:59:59");
+  return Math.max(0, Math.ceil((d - new Date()) / 86400000));
+})();
 
 /* 與爬蟲分類保持一致 */
 const CAT_GROUPS = [
@@ -1195,6 +1202,14 @@ function init() {
     String(now.getDate()).padStart(2,"0") + " " +
     String(now.getHours()).padStart(2,"0") + ":" +
     String(now.getMinutes()).padStart(2,"0");
+
+  /* 依 END_DATE 動態填入頁尾與空狀態的提示文案 */
+  const endDateTxt = fmtDeadline(END_DATE);
+  document.getElementById("footerNote").innerHTML =
+    '本頁僅顯示截止日於 <strong>' + endDateTxt + '</strong> 前的網路課程，需要查看全部請至 ' +
+    '<a href="https://www.gogocare.com.tw/tw/course/list.html" target="_blank" rel="noopener">GOGOCARE 課程總表</a>。';
+  document.getElementById("globalEmptyText").textContent =
+    "目前 " + endDateTxt + " 前沒有即將截止的網路課程，請持續關注。";
 
   Papa.parse(CSV_URL, {
     download: true,
