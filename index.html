@@ -112,13 +112,17 @@ img { max-width: 100%; height: auto; display: block; }
 
 .hero-logo {
   flex-shrink: 0;
-  height: 64px;
+  height: 52px;
   width: auto;
-  max-height: 64px;
+  max-height: 52px;
+  max-width: 90px;
   background: #fff;
   border-radius: 10px;
   padding: 6px 10px;
   object-fit: contain;
+}
+@media (min-width: 380px) {
+  .hero-logo { height: 64px; max-height: 64px; max-width: 110px; }
 }
 
 /* HERO 統計卡（單張，紅色強調） */
@@ -419,7 +423,7 @@ img { max-width: 100%; height: auto; display: block; }
    ════════════════════════════════════════ */
 .small-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -445,12 +449,15 @@ img { max-width: 100%; height: auto; display: block; }
 
 .small-thumb {
   flex-shrink: 0;
-  width: 110px;
-  height: 82px;
+  width: 90px;
+  height: 68px;
   border-radius: 8px;
   overflow: hidden;
   background: var(--thumb-placeholder);
   position: relative;
+}
+@media (min-width: 380px) {
+  .small-thumb { width: 110px; height: 82px; }
 }
 .small-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .small-thumb .thumb-placeholder {
@@ -657,7 +664,7 @@ img { max-width: 100%; height: auto; display: block; }
   .urgent-title { font-size: 1.15rem; }
   .urgent-footer { padding: 14px 22px; }
 
-  .small-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .small-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 
   .section-block-title { font-size: 1.2rem; }
   .group-title { font-size: 1.05rem; }
@@ -667,7 +674,7 @@ img { max-width: 100%; height: auto; display: block; }
    RWD：≥ 1100px（寬螢幕）
    ════════════════════════════════════════ */
 @media (min-width: 1100px) {
-  .small-grid { grid-template-columns: repeat(4, 1fr); }
+  .small-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .hero-title { font-size: 32px; }
 }
 </style>
@@ -725,10 +732,10 @@ img { max-width: 100%; height: auto; display: block; }
        class="small-card"
        style="border:2px solid #f59e0b;box-shadow:0 1px 4px rgba(245,158,11,.12);flex-direction:row !important;gap:12px;padding:12px;overflow:visible;border-radius:12px;transform:none !important;">
       <div class="small-thumb"
-           style="flex-shrink:0;width:auto;height:90px;aspect-ratio:unset;border-radius:8px;overflow:hidden;">
+           style="flex-shrink:0;width:90px;height:68px;aspect-ratio:unset;border-radius:8px;overflow:hidden;">
         <img src="https://www.gogocare.com.tw/UserFiles/course/C20251128174602001.jpg"
              alt="原來失智的世界是這樣" loading="lazy"
-             style="width:auto;height:100%;display:block;"
+             style="width:100%;height:100%;object-fit:cover;display:block;"
              onerror="onThumbError(this)">
       </div>
       <div class="small-body" style="padding:0;gap:5px;">
