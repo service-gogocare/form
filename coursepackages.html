@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>套餐預購中 · GOGOCARE</title>
+    <meta name="description" content="GOGOCARE 套餐預購表單，選擇您有興趣的學習套餐，優先取得預購優惠。">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+    <style>
+        /* ── 全域變數 ── */
+        :root {
+            --primary: #248dc5;
+            --primary-dark: #1a6e9e;
+            --primary-darker: #135279;
+            --accent: #ff5757;
+            --accent-dark: #d83a3a;
+            --gold: #f59e0b;
+            --gold-dark: #d97706;
+            --success: #10b981;
+            --ink: #1e2235;
+            --ink-2: #4b5563;
+            --muted: #9ca3af;
+            --line: #e5e7eb;
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --header-bg: #1e2235;
+            --tag-blue-bg: #dbeafe;
+            --tag-blue-text: #1d4ed8;
+            --tag-purple-bg: #ede9fe;
+            --tag-purple-text: #6d28d9;
+            --tag-green-bg: #d1fae5;
+            --tag-green-text: #065f46;
+            --tag-orange-bg: #fef3c7;
+            --tag-orange-text: #92400e;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
+            color: var(--ink);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ── Loading 遮罩 ── */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 4px solid var(--line);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink-2);
+        }
+
+        /* ── 頁面容器 ── */
+        .page-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px 60px;
+        }
+
+        /* ── Hero 頂部橫幅 ── */
+        .hero-banner {
+            background: #ffffff;
+            border-radius: 0 0 24px 24px;
+            padding: 0 0 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(36, 141, 197, .18);
+        }
+
+        .hero-banner::before,
+        .hero-banner::after {
+            display: none;
+        }
+
+        .hero-logo-wrap {
+            width: 100%;
+            margin-bottom: 0;
+            line-height: 0;
+        }
+
+        .hero-logo-wrap img {
+            width: 100%;
+            height: 80px;
+            display: block;
+            object-fit: cover;
+            object-position: left center;
+        }
+
+        @media (min-width: 768px) {
+            .hero-logo-wrap img {
+                height: 100px;
+            }
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 999px;
+            letter-spacing: .06em;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 3.5px;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .hero-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .hero-title .gold {
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: var(--ink-2);
+            line-height: 1.75;
+            margin: 0;
+        }
+
+        .hero-subtitle small {
+            font-size: .85rem;
+            opacity: .8;
+        }
+
+        /* ── 個人資訊區 ── */
+        .info-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+            border: 1px solid var(--line);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin: 0 0 20px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: .88rem;
+            color: var(--ink-2);
+            margin-bottom: 6px;
+        }
+
+        .form-label .req {
+            color: var(--accent);
+            margin-left: 3px;
+        }
+
+        .form-control,
+        .form-select {
+            border-color: var(--line);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: .92rem;
+            transition: border-color .18s, box-shadow .18s;
+            color: var(--ink);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(36, 141, 197, .15);
+        }
+
+        .form-hint {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .register-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gold);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: .8rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s;
+            white-space: nowrap;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, .35);
+            color: #fff;
+        }
+
+        /* ── 套餐列表區 ── */
+        .packages-section {
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 12px;
+            padding-left: 12px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .section-header i {
+            color: var(--gold);
+        }
+
+        .section-desc {
+            font-size: .84rem;
+            color: var(--muted);
+            margin: -6px 0 14px 16px;
+        }
+
+        /* ── 套餐卡片 ── */
+        .package-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: border-color .18s, box-shadow .18s;
+            cursor: pointer;
+        }
+
+        .package-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(36, 141, 197, .12);
+        }
+
+        .package-card.is-selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(36, 141, 197, .15);
+        }
+
+        .package-card-header {
+            background: var(--header-bg);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .package-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.35;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .package-check {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2.5px solid rgba(255, 255, 255, .35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all .18s;
+            background: transparent;
+        }
+
+        .package-check i {
+            color: transparent;
+            font-size: .8rem;
+            transition: color .18s;
+        }
+
+        .package-card.is-selected .package-check {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .package-card.is-selected .package-check i {
+            color: #fff;
+        }
+
+        .package-card-body {
+            padding: 16px 18px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .package-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .package-meta-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 12px;
+            margin-bottom: 12px;
+            font-size: .88rem;
+        }
+
+        .meta-label {
+            color: var(--muted);
+            font-weight: 600;
+            white-space: nowrap;
+            padding-top: 2px;
+        }
+
+        .meta-value {
+            color: var(--ink-2);
+        }
+
+        /* 課程列表 */
+        .course-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .course-list li {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: .84rem;
+            color: var(--ink-2);
+            line-height: 1.5;
+        }
+
+        .course-list li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* 標籤 */
+        .pkg-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .pkg-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .pkg-tag-blue {
+            background: var(--tag-blue-bg);
+            color: var(--tag-blue-text);
+            border: 1px solid #93c5fd;
+        }
+
+        .pkg-tag-purple {
+            background: var(--tag-purple-bg);
+            color: var(--tag-purple-text);
+            border: 1px solid #c4b5fd;
+        }
+
+        .pkg-tag-green {
+            background: var(--tag-green-bg);
+            color: var(--tag-green-text);
+            border: 1px solid #6ee7b7;
+        }
+
+        .pkg-tag-orange {
+            background: var(--tag-orange-bg);
+            color: var(--tag-orange-text);
+            border: 1px solid #fcd34d;
+        }
+
+        /* 課程ID 小標籤 */
+        .package-id-label {
+            font-size: .72rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .55);
+            letter-spacing: .06em;
+            margin-bottom: 3px;
+        }
+
+        /* 資訊徽章（送審日期、上課方式、時數、積分） */
+        .info-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: var(--ink-2);
+            font-size: .78rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .info-badge i {
+            color: var(--primary);
+            font-size: .72rem;
+        }
+
+        /* 價格區 */
+        .package-price-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+            min-width: 100px;
+        }
+
+        .price-original {
+            font-size: .82rem;
+            color: var(--muted);
+            text-decoration: line-through;
+        }
+
+        .price-preorder {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        .price-preorder small {
+            font-size: .65rem;
+            font-weight: 600;
+            color: var(--muted);
+            display: block;
+            text-align: right;
+        }
+
+        .price-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 999px;
+            letter-spacing: .04em;
+        }
+
+        /* ── 提交區 ── */
+        .submit-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            margin-top: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+            border: 1px solid var(--line);
+        }
+
+        .selected-summary {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            font-size: .88rem;
+            color: var(--ink-2);
+            display: none;
+        }
+
+        .selected-summary.visible {
+            display: block;
+        }
+
+        .selected-summary strong {
+            color: var(--primary-dark);
+        }
+
+        .selected-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .selected-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--primary);
+            color: #fff;
+            font-size: .78rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 999px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: .03em;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(36, 141, 197, .35);
+        }
+
+        .btn-submit:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        /* ── 成功畫面 ── */
+        .success-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px 28px;
+            text-align: center;
+            margin-top: 24px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, .07);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #fff;
+            margin: 0 auto 20px;
+            animation: pop-in .5s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        @keyframes pop-in {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .success-subtitle {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 24px;
+        }
+
+        .success-card {
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .success-card-header {
+            background: var(--success);
+            color: #fff;
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .success-pkg-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .success-pkg-item:last-child {
+            border-bottom: none;
+        }
+
+        .success-pkg-name {
+            font-weight: 700;
+            color: var(--ink);
+            font-size: .92rem;
+        }
+
+        .success-pkg-price {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: .95rem;
+            white-space: nowrap;
+        }
+
+        .btn-reset {
+            background: none;
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            padding: 10px 28px;
+            font-weight: 700;
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+            font-size: .9rem;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ── 空狀態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        /* ── 隱藏 ── */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ── 響應式 ── */
+        @media (max-width: 576px) {
+            .page-wrap {
+                padding: 0 12px 40px;
+            }
+
+            .hero-banner {
+                padding: 24px 18px 20px;
+                border-radius: 0 0 18px 18px;
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            .info-section,
+            .submit-section {
+                padding: 20px 16px;
+            }
+
+            .package-card-body {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .package-price-box {
+                align-items: flex-start;
+                flex-direction: row;
+                gap: 14px;
+                align-items: center;
+            }
+
+            .price-preorder {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading 遮罩 -->
+    <div id="loader" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在讀取最新套餐資訊...</div>
+    </div>
+
+    <!-- 主體表單 -->
+    <div id="formView">
+        <!-- Hero 橫幅 -->
+        <div class="hero-banner">
+            <!-- Logo 全寬橫幅 -->
+            <div class="hero-logo-wrap">
+                <img src="https://www.gogocare.com.tw/UserFiles/uploads/images/20251223161024_GOGOCARE_BAN.png"
+                    alt="GOGOCARE">
+            </div>
+            <div class="page-wrap" style="padding-bottom: 0; padding-top: 28px;">
+                <div style="text-align:center;">
+                    <div class="hero-title-row">
+                        <div class="hero-eyebrow"><i class="fa-solid fa-tag"></i> 限時預購優惠</div>
+                        <h1 class="hero-title">套餐<span class="gold">預購中</span></h1>
+                    </div>
+                    <p class="hero-subtitle">
+                        選擇您有興趣的課程套餐，搶先登記預購優惠。<br>
+                        <small>※ 課程上架時我們將主動通知您 ※ 實際售價以正式公告為準</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-wrap">
+            <form id="packageForm" onsubmit="handleSubmit(event)">
+
+                <!-- 填寫個人資訊 -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-user"></i> 填寫聯絡資訊
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- 學員姓名 -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="studentName">
+                                學員姓名 <span class="req">*</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" class="form-control" id="studentName" name="studentName"
+                                    placeholder="請輸入您的姓名" required>
+                            </div>
+                            <div class="form-hint">
+                                還不是學員嗎？
+                                <a href="https://gogocare.com.tw/tw/mem/register" target="_blank" class="register-btn">
+                                    <i class="fa-solid fa-user-plus"></i> 前往註冊
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 學員 Email -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="email">
+                                學員 Email <span class="req">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="name@example.com" required>
+                            <div class="form-hint">確認信將寄送至此信箱。</div>
+                        </div>
+
+                        <!-- Line ID -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="lineId">Line ID</label>
+                            <input type="text" class="form-control" id="lineId" name="lineId"
+                                placeholder="請輸入您的 Line ID">
+                            <div class="form-hint">方便我們在課程上架時通知您。</div>
+                        </div>
+
+                        <!-- 聯絡電話 -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="phone">
+                                聯絡電話 <span class="req">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="09xxxxxxxx"
+                                required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 套餐選擇 -->
+                <div class="packages-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-box-open"></i> 選擇預購套餐
+                    </div>
+                    <div class="section-desc">可複選，勾選您有興趣的套餐。</div>
+
+                    <div id="packageList">
+                        <!-- 由 JS 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 送出區 -->
+                <div class="submit-section">
+                    <div id="selectedSummary" class="selected-summary">
+                        <strong><i class="fa-solid fa-check-circle me-1"></i> 已選擇套餐：</strong>
+                        <div id="selectedPills" class="selected-pills"></div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        送出預購登記
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功畫面 -->
+    <div id="successView" class="page-wrap hidden">
+        <div class="success-container">
+            <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="success-title">預購登記成功！</div>
+            <div class="success-subtitle" id="successSubtitle">確認信已寄送，感謝您的登記。</div>
+
+            <div class="success-card">
+                <div class="success-card-header">
+                    <i class="fa-solid fa-receipt me-2"></i> 您的預購清單
+                </div>
+                <div id="successList">
+                    <!-- 動態生成 -->
+                </div>
+            </div>
+
+            <button class="btn-reset" onclick="resetForm()">
+                <i class="fa-solid fa-rotate-left me-1"></i> 填寫新表單
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================
+           ★★★ 設定區 ★★★ — 請修改以下兩個 URL
+           ============================================================ */
+
+        // 1. 套餐資料 CSV 網址（Google Sheet 公開 CSV 連結）
+        //    欄位：課程ID, 送審日期, 上課方式, 課程時數(小時), 預計積分數, 原價, 預購價, 課程屬性、類別, 課程名稱
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT4ikMaRE149He71txEdWCnML2ti9ZHzPHMaiwStMjbSIp1WEKPJG2NUMpXRBHHZQK6mzUyrESMBFgZ/pub?gid=0&single=true&output=csv";
+
+        // 2. GAS 後端 Web App 網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbz-2dyLxSf6UfouKsVnKiRaJr7_AV-P5TqieyIUumLuGLbAcqDmDthjKapVjWCNh0KUOQ/exec";
+
+        // 3. 前往註冊連結（可自訂）
+        const REGISTER_URL = "https://www.gogocare.com.tw/Register";
+
+        /* ============================================================ */
+
+        let packagesData = [];
+        let selectedIds = new Set();
+
+        /* ── 標籤顏色對照 ── */
+        const TAG_COLORS = [
+            'pkg-tag-blue', 'pkg-tag-purple', 'pkg-tag-green', 'pkg-tag-orange'
+        ];
+
+        function getTagClass(text, index) {
+            return TAG_COLORS[index % TAG_COLORS.length];
+        }
+
+        /* ── HTML 跳脫 ── */
+        function esc(s) {
+            return String(s || "")
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        /* ── 格式化價格（支援純數字 or NT$xxxx 格式） ── */
+        function fmtPrice(v) {
+            const s = String(v || "").trim().replace(/,/g, "");
+            if (!s || s === "" || s.toLowerCase() === "false") return "";
+            if (/^\d+(\.\d+)?$/.test(s)) return "NT$" + Number(s).toLocaleString();
+            return s; // 已是 NT$xxx 格式直接回傳
+        }
+
+        /* ── 從價格字串取出純數字（用於折扣計算） ── */
+        function extractNum(v) {
+            const s = String(v || "").replace(/[NT$,，\s]/g, "");
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
+        /* ── 解析課程列表（換行或逗號或頓號分隔） ── */
+        function parseCourses(raw) {
+            if (!raw) return [];
+            return raw.split(/[\n\r,，、;；]/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+        }
+
+        /* ── 解析標籤（逗號或頓號分隔） ── */
+        function parseTags(raw) {
+            if (!raw) return [];
+            return raw.split(/[,，、\n\r]/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+        }
+
+        /* ── 讀取 CSV ── */
+        window.addEventListener('load', function () {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results) {
+                    packagesData = results.data.map((row, i) => {
+                        return {
+                            // 唯一識別（優先用課程ID欄，否則用流水號）
+                            id: getField(row, ['課程ID', '課程Id', 'id', 'ID']) || ('pkg_' + i),
+                            // 套餐名稱
+                            name: getField(row, ['課程名稱', '套餐名稱', 'name', 'Name']),
+                            // 送審日期
+                            reviewDate: getField(row, ['送審日期', '日期', 'date']),
+                            // 上課方式
+                            teachingMethod: getField(row, ['上課方式', '授課方式', 'method']),
+                            // 課程時數（欄位名含換行）
+                            hours: getField(row, ['課程時數\n(小時)', '課程時數(小時)', '課程時數', '時數', 'hours']),
+                            // 預計積分數
+                            credits: getField(row, ['預計積分數', '積分數', '積分', 'credits']),
+                            // 課程屬性、類別
+                            categories: getField(row, ['課程屬性、類別', '課程屬性,類別', '課程屬性類別', '類別', 'categories']),
+                            // 原價
+                            originalPrice: getField(row, ['原價', 'original_price', 'OriginalPrice']),
+                            // 預購價（欄位名前有全形空格）
+                            preorderPrice: getField(row, ['　預購價', '預購價', 'preorder_price', 'PreorderPrice']),
+                        };
+                    }).filter(p => p.name);
+
+                    renderPackages();
+                    document.getElementById('loader').classList.add('hidden');
+                },
+                error: function (err) {
+                    document.getElementById('loader').innerHTML =
+                        '<div style="text-align:center;padding:20px;color:#ef4444;">' +
+                        '<i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;"></i>' +
+                        '<br><br>讀取套餐資料失敗，請稍後重試。<br><small>' + err + '</small></div>';
+                }
+            });
+        });
+
+        /* ── 鬆散欄位取值 ── */
+        function getField(row, keys) {
+            for (const k of keys) {
+                const v = row[k];
+                if (v !== undefined && v !== null && String(v).trim() !== "") return String(v).trim();
+            }
+            return "";
+        }
+
+        /* ── 渲染套餐列表 ── */
+        function renderPackages() {
+            const container = document.getElementById('packageList');
+
+            if (!packagesData.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box-open"></i>
+                        目前尚無套餐資料，請稍後再試。
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            packagesData.forEach(pkg => {
+                const cats = parseTags(pkg.categories);
+                const origPrice = fmtPrice(pkg.originalPrice);
+                const prePrice = fmtPrice(pkg.preorderPrice);
+
+                // 計算折扣（支援 NT$xxx 格式）
+                let discountBadge = '';
+                const orig = extractNum(pkg.originalPrice);
+                const pre = extractNum(pkg.preorderPrice);
+                if (orig > 0 && pre > 0 && orig > pre) {
+                    const pct = Math.round((pre / orig) * 100);
+                    discountBadge = `<span class="price-badge"><i class="fa-solid fa-fire-flame-curved"></i> ${pct}折優惠</span>`;
+                }
+
+                // 積分類別標籤 HTML
+                const catTagsHtml = cats.map((cat, i) =>
+                    `<span class="pkg-tag ${getTagClass(cat, i)}">${esc(cat)}</span>`
+                ).join('');
+
+                // 課程基本資訊徽章（送審日期 / 上課方式 / 時數 / 積分）
+                let infoBadges = '';
+                if (pkg.reviewDate) infoBadges += `<span class="info-badge"><i class="fa-regular fa-calendar"></i> ${esc(pkg.reviewDate)}</span>`;
+                if (pkg.teachingMethod) infoBadges += `<span class="info-badge"><i class="fa-solid fa-chalkboard-user"></i> ${esc(pkg.teachingMethod)}</span>`;
+                if (pkg.hours) infoBadges += `<span class="info-badge"><i class="fa-regular fa-clock"></i> ${esc(pkg.hours)} 小時</span>`;
+                if (pkg.credits) infoBadges += `<span class="info-badge"><i class="fa-solid fa-star"></i> ${esc(pkg.credits)} 積分</span>`;
+
+                html += `
+                <div class="package-card" id="card_${pkg.id}" onclick="toggleSelect('${pkg.id}')">
+                    <div class="package-card-header">
+                        <div>
+                            <div class="package-id-label">${esc(pkg.id)}</div>
+                            <div class="package-name">${esc(pkg.name)}</div>
+                        </div>
+                        <div class="package-check">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="package-card-body">
+                        <div class="package-info">
+                            ${infoBadges ? `<div class="info-badges">${infoBadges}</div>` : ''}
+                            <div class="package-meta-grid">
+                                <div class="meta-label">課程屬性類別</div>
+                                <div class="meta-value">
+                                    ${cats.length
+                        ? `<div class="pkg-tags">${catTagsHtml}</div>`
+                        : '<span style="color:var(--muted)">-</span>'
+                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="package-price-box">
+                            ${origPrice ? `<div class="price-original">${esc(origPrice)}</div>` : ''}
+                            <div class="price-preorder">
+                                ${prePrice ? esc(prePrice) : '洽詢中'}
+                                <small>預購價</small>
+                            </div>
+                            ${discountBadge}
+                        </div>
+                    </div>
+                    <!-- 隱藏 checkbox -->
+                    <input type="checkbox" name="packages" value="${pkg.id}"
+                        id="chk_${pkg.id}" style="display:none;">
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        /* ── 切換選取套餐 ── */
+        function toggleSelect(id) {
+            const card = document.getElementById('card_' + id);
+            const chk = document.getElementById('chk_' + id);
+
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+                card.classList.remove('is-selected');
+                chk.checked = false;
+            } else {
+                selectedIds.add(id);
+                card.classList.add('is-selected');
+                chk.checked = true;
+            }
+
+            updateSummary();
+        }
+
+        /* ── 更新已選摘要 ── */
+        function updateSummary() {
+            const summary = document.getElementById('selectedSummary');
+            const pills = document.getElementById('selectedPills');
+
+            if (selectedIds.size === 0) {
+                summary.classList.remove('visible');
+                return;
+            }
+
+            summary.classList.add('visible');
+
+            let pillHtml = '';
+            selectedIds.forEach(id => {
+                const pkg = packagesData.find(p => p.id === id);
+                if (pkg) {
+                    pillHtml += `<span class="selected-pill"><i class="fa-solid fa-box"></i> ${esc(pkg.name)}</span>`;
+                }
+            });
+            pills.innerHTML = pillHtml;
+        }
+
+        /* ── 表單提交 ── */
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            if (selectedIds.size === 0) {
+                showToast('請至少選擇一個套餐！', 'warning');
+                return;
+            }
+
+            const form = document.getElementById('packageForm');
+            const btn = document.getElementById('submitBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 處理中...';
+
+            // 收集選取的套餐資訊
+            const selectedPackages = [];
+            selectedIds.forEach(id => {
+                const pkg = packagesData.find(p => p.id === id);
+                if (pkg) selectedPackages.push(pkg);
+            });
+
+            const payload = {
+                studentName: form.studentName.value.trim(),
+                email: form.email.value.trim(),
+                lineId: form.lineId.value.trim(),
+                phone: form.phone.value.trim(),
+                packages: selectedPackages.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    categories: p.categories,
+                    courses: p.courses,
+                    originalPrice: p.originalPrice,
+                    preorderPrice: p.preorderPrice,
+                }))
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('網路回應錯誤: ' + res.status);
+                    return res.json();
+                })
+                .then(onSuccess)
+                .catch(onError);
+        }
+
+        function onSuccess(res) {
+            if (res.status === 'success') {
+                // 顯示成功頁面
+                document.getElementById('formView').classList.add('hidden');
+                document.getElementById('successView').classList.remove('hidden');
+
+                // 郵件狀態
+                const sub = res.emailSent
+                    ? `確認信已寄送至：<strong>${esc(res.email)}</strong>`
+                    : `⚠️ 郵件發送失敗，但您的預購已成功儲存。（信箱：${esc(res.email)}）`;
+                document.getElementById('successSubtitle').innerHTML = sub;
+
+                // 成功清單
+                let listHtml = '';
+                (res.packages || []).forEach(pkg => {
+                    const prePrice = fmtPrice(pkg.preorderPrice);
+                    listHtml += `
+                    <div class="success-pkg-item">
+                        <div class="success-pkg-name">
+                            <i class="fa-solid fa-box me-2" style="color:var(--primary)"></i>${esc(pkg.name)}
+                        </div>
+                        <div class="success-pkg-price">${prePrice || '洽詢中'}</div>
+                    </div>`;
+                });
+                document.getElementById('successList').innerHTML = listHtml;
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                resetBtn();
+                showToast('錯誤：' + (res.message || '未知錯誤'), 'error');
+            }
+        }
+
+        function onError(err) {
+            resetBtn();
+            showToast('系統錯誤：' + err, 'error');
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 送出預購登記';
+        }
+
+        function resetForm() {
+            document.getElementById('formView').classList.remove('hidden');
+            document.getElementById('successView').classList.add('hidden');
+            document.getElementById('packageForm').reset();
+
+            // 清除選取狀態
+            selectedIds.forEach(id => {
+                document.getElementById('card_' + id)?.classList.remove('is-selected');
+            });
+            selectedIds.clear();
+            document.getElementById('selectedSummary').classList.remove('visible');
+            document.getElementById('selectedPills').innerHTML = '';
+
+            resetBtn();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ── Toast 提示 ── */
+        function showToast(msg, type) {
+            const el = document.createElement('div');
+            el.style.cssText = `
+                position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+                background:${type === 'warning' ? '#f59e0b' : '#ef4444'};
+                color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;
+                z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.15);font-size:.9rem;
+                animation:fadeIn .3s ease;
+            `;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+    </script>
+</body>
+
+</html>
