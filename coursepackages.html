@@ -15,7 +15,7 @@
 
     <style>
         /* ── 全域變數 ── */
-        :root {
+            :root {
             --primary: #248dc5;
             --primary-dark: #1a6e9e;
             --primary-darker: #135279;
@@ -850,7 +850,7 @@
                             </label>
                             <input type="email" class="form-control" id="email" name="email"
                                 placeholder="name@example.com" required>
-                            <div class="form-hint">確認信將寄送至此信箱。</div>
+                            <div class="form-hint">確認信與預購優惠劵將寄送至信箱給您</div>
                         </div>
 
                         <!-- Line ID -->
@@ -990,6 +990,12 @@
         }
 
         /* ── 讀取 CSV ── */
+        // 來自：7月預購套餐來源表（E2:E15）
+        const PREORDER_SOURCE_SHEET_ID = '1qdNfkmgCwk-mWjDaEGetdqdeuEPqT0dsfNYshkCPLZ0';
+        const PREORDER_SOURCE_GID = '0';
+        const PREORDER_SOURCE_CSV = `https://docs.google.com/spreadsheets/d/${PREORDER_SOURCE_SHEET_ID}/export?format=csv&gid=${PREORDER_SOURCE_GID}`;
+        let preorderSourceCats = []; // 來自 E2:E15 的字串陣列
+
         window.addEventListener('load', function () {
             Papa.parse(CSV_URL, {
                 download: true,
@@ -1010,8 +1016,8 @@
                             hours: getField(row, ['課程時數\n(小時)', '課程時數(小時)', '課程時數', '時數', 'hours']),
                             // 預計積分數
                             credits: getField(row, ['預計積分數', '積分數', '積分', 'credits']),
-                            // 課程屬性、類別
-                            categories: getField(row, ['課程屬性、類別', '課程屬性,類別', '課程屬性類別', '類別', 'categories']),
+                            // 課程屬性、類別（改從包含積分類別欄位讀取）
+                            categories: getField(row, ['包含積分類別', '課程屬性、類別', '課程屬性,類別', '課程屬性類別', '類別', 'categories']),
                             // 原價
                             originalPrice: getField(row, ['原價', 'original_price', 'OriginalPrice']),
                             // 預購價（欄位名前有全形空格）
@@ -1027,6 +1033,26 @@
                         '<div style="text-align:center;padding:20px;color:#ef4444;">' +
                         '<i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;"></i>' +
                         '<br><br>讀取套餐資料失敗，請稍後重試。<br><small>' + err + '</small></div>';
+                }
+            });
+
+            // 同步載入「7月預購套餐來源表」的 E 欄 (E2~E15)
+            Papa.parse(PREORDER_SOURCE_CSV, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function (res2) {
+                    try {
+                        // res2.data 是每列陣列，E 欄為 index 4
+                        const rows = res2.data || [];
+                        // E2 ~ E15 => rows[1] .. rows[14]
+                        preorderSourceCats = rows.slice(1, 15).map(r => {
+                            const v = (r && r[4]) ? String(r[4]).trim() : "";
+                            return v;
+                        }).filter(s => s);
+                    } catch (e) {
+                        preorderSourceCats = [];
+                    }
                 }
             });
         });
@@ -1055,7 +1081,9 @@
 
             let html = '';
             packagesData.forEach(pkg => {
-                const cats = parseTags(pkg.categories);
+                const cats = (preorderSourceCats && preorderSourceCats.length)
+                    ? preorderSourceCats
+                    : parseTags(pkg.categories);
                 const origPrice = fmtPrice(pkg.originalPrice);
                 const prePrice = fmtPrice(pkg.preorderPrice);
 
@@ -1064,7 +1092,7 @@
                 const orig = extractNum(pkg.originalPrice);
                 const pre = extractNum(pkg.preorderPrice);
                 if (orig > 0 && pre > 0 && orig > pre) {
-                    const pct = Math.round((pre / orig) * 100);
+                    const pct = Math.round((pre / orig) * 10);
                     discountBadge = `<span class="price-badge"><i class="fa-solid fa-fire-flame-curved"></i> ${pct}折優惠</span>`;
                 }
 
