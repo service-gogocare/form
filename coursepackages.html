@@ -1459,31 +1459,70 @@ let currentGroup = '';
     </script>
     <script>
 (function() {
-  function sendIframeHeight() {
-    const height = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight
-    );
+  let lastSentHeight = 0;
+  let heightNotifyTimer = null;
 
-    window.parent.postMessage({
-      type: "COURSE_PACKAGES_RESIZE",
-      height: height
-    }, "*");
+  function getActualContentHeight() {
+    let bottom = 0;
+    const children = Array.from(document.body.children);
+
+    children.forEach(function(el) {
+      if (el.tagName === "SCRIPT") return;
+      const style = window.getComputedStyle(el);
+      if (style.display === "none") return;
+
+      const rect = el.getBoundingClientRect();
+      if (rect.height <= 0) return;
+      bottom = Math.max(bottom, rect.bottom + window.scrollY);
+    });
+
+    return Math.ceil(bottom + 20);
   }
 
-  window.addEventListener("load", sendIframeHeight);
-  window.addEventListener("resize", sendIframeHeight);
+  function notifyHeight(force) {
+    const height = getActualContentHeight();
+    if (!force && (Math.abs(height - lastSentHeight) < 10 || height < 100)) return;
+    lastSentHeight = height;
 
-  setTimeout(sendIframeHeight, 500);
-  setTimeout(sendIframeHeight, 1500);
-  setTimeout(sendIframeHeight, 3000);
+    try {
+      window.parent.postMessage({
+        type: "COURSE_PACKAGES_RESIZE",
+        height: height
+      }, "*");
+    } catch (e) {}
+  }
 
-  const observer = new MutationObserver(sendIframeHeight);
+  function scheduleNotify(force) {
+    if (heightNotifyTimer) clearTimeout(heightNotifyTimer);
+    heightNotifyTimer = setTimeout(function() {
+      notifyHeight(!!force);
+    }, 100);
+  }
+
+  window.addEventListener("message", function(e) {
+    if (e.data && e.data.type === "REQUEST_COURSE_PACKAGES_HEIGHT") {
+      scheduleNotify(true);
+    }
+  });
+
+  window.addEventListener("load", function() { scheduleNotify(true); });
+  window.addEventListener("resize", function() { scheduleNotify(false); });
+  document.addEventListener("DOMContentLoaded", function() { scheduleNotify(true); });
+
+  setTimeout(function() { scheduleNotify(true); }, 300);
+  setTimeout(function() { scheduleNotify(true); }, 1000);
+  setTimeout(function() { scheduleNotify(true); }, 3000);
+
+  const observer = new MutationObserver(function() {
+    scheduleNotify(false);
+  });
   observer.observe(document.body, {
     childList: true,
     subtree: true,
     attributes: true
   });
+
+  window.scheduleCoursePackagesHeightNotify = scheduleNotify;
 })();
 </script>
 
