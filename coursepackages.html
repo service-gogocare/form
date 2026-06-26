@@ -304,23 +304,40 @@
         }
 
         .package-group-header {
+            position: relative;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 16px;
             margin: 24px 0 12px;
-            padding: 0;
+            padding: 0 12px;
             font-size: 1.12rem;
             font-weight: 800;
             color: var(--ink);
-            text-align: left;
+            text-align: center;
+        }
+
+        .package-group-header::before,
+        .package-group-header::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background: #6b7280;
+            opacity: 1;
+            transform: translateY(-50%);
+        }
+
+        .package-group-header::before {
+            right: 50%;
+            margin-right: 8px;
+            width: calc(50% - 8px);
         }
 
         .package-group-header::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--line);
-            opacity: .7;
+            left: 50%;
+            margin-left: 8px;
+            width: calc(50% - 8px);
         }
 
         .package-card {
@@ -973,12 +990,24 @@
             'pkg-tag-blue', 'pkg-tag-purple', 'pkg-tag-green', 'pkg-tag-orange'
         ];
 
-        const PACKAGE_GROUPS = [
-            { name: '整年積分蓄力', ids: ['C001', 'C002'] },
-            { name: '大項積分補足', ids: ['C003', 'C004', 'C005'] },
-            { name: '機能型積分加值', ids: ['C006', 'C007', 'C008', 'C009', 'C010'] },
-            { name: '微量積分快充', ids: ['C011', 'C012', 'C013', 'C014', 'C015'] }
-        ];
+       const PACKAGE_GROUPS = [
+    {
+        name: "整年積分蓄力",
+        ids: ["C001", "C002"]
+    },
+    {
+        name: "大項積分補充",
+        ids: ["C003", "C004", "C005"]
+    },
+    {
+        name: "機能型積分加值",
+        ids: ["C006", "C007", "C008", "C009", "C010"]
+    },
+    {
+        name: "微量積分快充",
+        ids: ["C011", "C012", "C013", "C014", "C015"]
+    }
+];
 
         function getTagClass(text, index) {
             return TAG_COLORS[index % TAG_COLORS.length];
@@ -1100,6 +1129,10 @@
         }
 
         /* ── 渲染套餐列表 ── */
+
+function getPackageGroup(id) {
+    return PACKAGE_GROUPS[String(id || "").trim()] || "";
+}
         function renderPackages() {
             const container = document.getElementById('packageList');
 
@@ -1118,6 +1151,7 @@
             }, {});
 
             let html = '';
+let currentGroup = '';
             const renderedIds = new Set();
 
             PACKAGE_GROUPS.forEach(group => {
