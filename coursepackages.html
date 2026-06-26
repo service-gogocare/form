@@ -1473,6 +1473,11 @@ let currentGroup = '';
 
   window.addEventListener("load", sendIframeHeight);
   window.addEventListener("resize", sendIframeHeight);
+  window.addEventListener("message", function(e) {
+    if (e.data && e.data.type === "REQUEST_COURSE_PACKAGES_HEIGHT") {
+      sendIframeHeight();
+    }
+  });
 
   setTimeout(sendIframeHeight, 500);
   setTimeout(sendIframeHeight, 1500);
