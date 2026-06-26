@@ -1318,6 +1318,36 @@
             setTimeout(() => el.remove(), 4000);
         }
     </script>
+    <script>
+(function() {
+  function sendIframeHeight() {
+    const height = Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight
+    );
+
+    window.parent.postMessage({
+      type: "COURSE_PACKAGES_RESIZE",
+      height: height
+    }, "*");
+  }
+
+  window.addEventListener("load", sendIframeHeight);
+  window.addEventListener("resize", sendIframeHeight);
+
+  setTimeout(sendIframeHeight, 500);
+  setTimeout(sendIframeHeight, 1500);
+  setTimeout(sendIframeHeight, 3000);
+
+  const observer = new MutationObserver(sendIframeHeight);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true
+  });
+})();
+</script>
+
 </body>
 
 </html>
