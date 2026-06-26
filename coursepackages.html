@@ -299,6 +299,30 @@
         }
 
         /* ── 套餐卡片 ── */
+        .package-group {
+            margin-bottom: 24px;
+        }
+
+        .package-group-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0 12px;
+            padding: 0;
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: var(--ink);
+            text-align: left;
+        }
+
+        .package-group-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+            opacity: .7;
+        }
+
         .package-card {
             background: var(--card-bg);
             border: 1.5px solid var(--line);
@@ -949,6 +973,13 @@
             'pkg-tag-blue', 'pkg-tag-purple', 'pkg-tag-green', 'pkg-tag-orange'
         ];
 
+        const PACKAGE_GROUPS = [
+            { name: '整年積分蓄力', ids: ['C001', 'C002'] },
+            { name: '大項積分補足', ids: ['C003', 'C004', 'C005'] },
+            { name: '機能型積分加值', ids: ['C006', 'C007', 'C008', 'C009', 'C010'] },
+            { name: '微量積分快充', ids: ['C011', 'C012', 'C013', 'C014', 'C015'] }
+        ];
+
         function getTagClass(text, index) {
             return TAG_COLORS[index % TAG_COLORS.length];
         }
@@ -1081,36 +1112,69 @@
                 return;
             }
 
+            const packageMap = packagesData.reduce((map, pkg) => {
+                map[pkg.id] = pkg;
+                return map;
+            }, {});
+
             let html = '';
-            packagesData.forEach(pkg => {
-                const cats = (preorderSourceCats && preorderSourceCats.length)
-                    ? preorderSourceCats
-                    : parseTags(pkg.categories);
-                const origPrice = fmtPrice(pkg.originalPrice);
-                const prePrice = fmtPrice(pkg.preorderPrice);
+            const renderedIds = new Set();
 
-                // 計算折扣（支援 NT$xxx 格式）
-                let discountBadge = '';
-                const orig = extractNum(pkg.originalPrice);
-                const pre = extractNum(pkg.preorderPrice);
-                if (orig > 0 && pre > 0 && orig > pre) {
-                    const pct = Math.round((pre / orig) * 10);
-                    discountBadge = `<span class="price-badge"><i class="fa-solid fa-fire-flame-curved"></i> ${pct}折優惠</span>`;
-                }
+            PACKAGE_GROUPS.forEach(group => {
+                const groupPackages = group.ids
+                    .map(id => packageMap[id])
+                    .filter(pkg => !!pkg);
 
-                // 積分類別標籤 HTML
-                const catTagsHtml = cats.map((cat, i) =>
-                    `<span class="pkg-tag ${getTagClass(cat, i)}">${esc(cat)}</span>`
-                ).join('');
+                if (!groupPackages.length) return;
 
-                // 課程基本資訊徽章（送審日期 / 上課方式 / 時數 / 積分）
-                let infoBadges = '';
-                if (pkg.reviewDate) infoBadges += `<span class="info-badge"><i class="fa-regular fa-calendar"></i> ${esc(pkg.reviewDate)}</span>`;
-                if (pkg.teachingMethod) infoBadges += `<span class="info-badge"><i class="fa-solid fa-chalkboard-user"></i> ${esc(pkg.teachingMethod)}</span>`;
-                if (pkg.hours) infoBadges += `<span class="info-badge"><i class="fa-regular fa-clock"></i> ${esc(pkg.hours)} 小時</span>`;
-                if (pkg.credits) infoBadges += `<span class="info-badge"><i class="fa-solid fa-star"></i> ${esc(pkg.credits)} 積分</span>`;
+                html += `<div class="package-group">
+                            <div class="package-group-header">${esc(group.name)}</div>`;
+                groupPackages.forEach(pkg => {
+                    renderedIds.add(pkg.id);
+                    html += renderPackageCard(pkg);
+                });
+                html += `</div>`;
+            });
 
-                html += `
+            const remainingPackages = packagesData.filter(pkg => !renderedIds.has(pkg.id));
+            if (remainingPackages.length) {
+                html += `<div class="package-group">
+                            <div class="package-group-header">其他套餐</div>`;
+                remainingPackages.forEach(pkg => {
+                    html += renderPackageCard(pkg);
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderPackageCard(pkg) {
+            const cats = (preorderSourceCats && preorderSourceCats.length)
+                ? preorderSourceCats
+                : parseTags(pkg.categories);
+            const origPrice = fmtPrice(pkg.originalPrice);
+            const prePrice = fmtPrice(pkg.preorderPrice);
+
+            let discountBadge = '';
+            const orig = extractNum(pkg.originalPrice);
+            const pre = extractNum(pkg.preorderPrice);
+            if (orig > 0 && pre > 0 && orig > pre) {
+                const pct = Math.round((pre / orig) * 10);
+                discountBadge = `<span class="price-badge"><i class="fa-solid fa-fire-flame-curved"></i> ${pct}折優惠</span>`;
+            }
+
+            const catTagsHtml = cats.map((cat, i) =>
+                `<span class="pkg-tag ${getTagClass(cat, i)}">${esc(cat)}</span>`
+            ).join('');
+
+            let infoBadges = '';
+            if (pkg.reviewDate) infoBadges += `<span class="info-badge"><i class="fa-regular fa-calendar"></i> ${esc(pkg.reviewDate)}</span>`;
+            if (pkg.teachingMethod) infoBadges += `<span class="info-badge"><i class="fa-solid fa-chalkboard-user"></i> ${esc(pkg.teachingMethod)}</span>`;
+            if (pkg.hours) infoBadges += `<span class="info-badge"><i class="fa-regular fa-clock"></i> ${esc(pkg.hours)} 小時</span>`;
+            if (pkg.credits) infoBadges += `<span class="info-badge"><i class="fa-solid fa-star"></i> ${esc(pkg.credits)} 積分</span>`;
+
+            return `
                 <div class="package-card" id="card_${pkg.id}" onclick="toggleSelect('${pkg.id}')">
                     <div class="package-card-header">
                         <div>
@@ -1143,13 +1207,9 @@
                             ${discountBadge}
                         </div>
                     </div>
-                    <!-- 隱藏 checkbox -->
                     <input type="checkbox" name="packages" value="${pkg.id}"
                         id="chk_${pkg.id}" style="display:none;">
                 </div>`;
-            });
-
-            container.innerHTML = html;
         }
 
         /* ── 切換選取套餐 ── */
