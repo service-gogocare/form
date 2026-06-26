@@ -1065,43 +1065,72 @@
         const PREORDER_SOURCE_CSV = `https://docs.google.com/spreadsheets/d/${PREORDER_SOURCE_SHEET_ID}/export?format=csv&gid=${PREORDER_SOURCE_GID}`;
         let preorderSourceCats = []; // 來自 E2:E15 的字串陣列
 
-        window.addEventListener('load', function () {
+        function showLoadError(message, detail) {
+            const loader = document.getElementById('loader');
+            if (!loader) return;
+            loader.innerHTML =
+                '<div style="text-align:center;padding:20px;color:#ef4444;">' +
+                '<i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;"></i>' +
+                '<br><br>' + esc(message) +
+                (detail ? '<br><small>' + esc(detail) + '</small>' : '') +
+                '</div>';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader')?.classList.add('hidden');
+        }
+
+        function loadPackages() {
+            const loadTimeout = setTimeout(function () {
+                showLoadError('讀取套餐資料逾時，請重新整理頁面或稍後再試。', 'CSV 請求超過 15 秒未完成');
+            }, 15000);
+
+            if (!window.Papa) {
+                clearTimeout(loadTimeout);
+                showLoadError('讀取工具載入失敗，請重新整理頁面。', 'PapaParse CDN 未成功載入');
+                return;
+            }
+
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
                 complete: function (results) {
-                    packagesData = results.data.map((row, i) => {
-                        return {
-                            // 唯一識別（優先用課程ID欄，否則用流水號）
-                            id: getField(row, ['課程ID', '課程Id', 'id', 'ID']) || ('pkg_' + i),
-                            // 套餐名稱
-                            name: getField(row, ['課程名稱', '套餐名稱', 'name', 'Name']),
-                            // 送審日期
-                            reviewDate: getField(row, ['送審日期', '日期', 'date']),
-                            // 上課方式
-                            teachingMethod: getField(row, ['上課方式', '授課方式', 'method']),
-                            // 課程時數（欄位名含換行）
-                            hours: getField(row, ['課程時數\n(小時)', '課程時數(小時)', '課程時數', '時數', 'hours']),
-                            // 預計積分數
-                            credits: getField(row, ['預計積分數', '積分數', '積分', 'credits']),
-                            // 課程屬性、類別（改從包含積分類別欄位讀取）
-                            categories: getField(row, ['包含積分類別', '課程屬性、類別', '課程屬性,類別', '課程屬性類別', '類別', 'categories']),
-                            // 原價
-                            originalPrice: getField(row, ['原價', 'original_price', 'OriginalPrice']),
-                            // 預購價（欄位名前有全形空格）
-                            preorderPrice: getField(row, ['　預購價', '預購價', 'preorder_price', 'PreorderPrice']),
-                        };
-                    }).filter(p => p.name);
+                    clearTimeout(loadTimeout);
 
-                    renderPackages();
-                    document.getElementById('loader').classList.add('hidden');
+                    try {
+                        packagesData = results.data.map((row, i) => {
+                            return {
+                                // 唯一識別（優先用課程ID欄，否則用流水號）
+                                id: getField(row, ['課程ID', '課程Id', 'id', 'ID']) || ('pkg_' + i),
+                                // 套餐名稱
+                                name: getField(row, ['課程名稱', '套餐名稱', 'name', 'Name']),
+                                // 送審日期
+                                reviewDate: getField(row, ['送審日期', '日期', 'date']),
+                                // 上課方式
+                                teachingMethod: getField(row, ['上課方式', '授課方式', 'method']),
+                                // 課程時數（欄位名含換行）
+                                hours: getField(row, ['課程時數\n(小時)', '課程時數(小時)', '課程時數', '時數', 'hours']),
+                                // 預計積分數
+                                credits: getField(row, ['預計積分數', '積分數', '積分', 'credits']),
+                                // 課程屬性、類別（改從包含積分類別欄位讀取）
+                                categories: getField(row, ['包含積分類別', '課程屬性、類別', '課程屬性,類別', '課程屬性類別', '類別', 'categories']),
+                                // 原價
+                                originalPrice: getField(row, ['原價', 'original_price', 'OriginalPrice']),
+                                // 預購價（欄位名前有全形空格）
+                                preorderPrice: getField(row, ['　預購價', '預購價', 'preorder_price', 'PreorderPrice']),
+                            };
+                        }).filter(p => p.name);
+
+                        renderPackages();
+                        hideLoader();
+                    } catch (e) {
+                        showLoadError('套餐資料處理失敗，請檢查 CSV 欄位格式。', e.message || String(e));
+                    }
                 },
                 error: function (err) {
-                    document.getElementById('loader').innerHTML =
-                        '<div style="text-align:center;padding:20px;color:#ef4444;">' +
-                        '<i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;"></i>' +
-                        '<br><br>讀取套餐資料失敗，請稍後重試。<br><small>' + err + '</small></div>';
+                    clearTimeout(loadTimeout);
+                    showLoadError('讀取套餐資料失敗，請稍後重試。', err?.message || String(err));
                 }
             });
 
@@ -1122,9 +1151,18 @@
                     } catch (e) {
                         preorderSourceCats = [];
                     }
+                },
+                error: function () {
+                    preorderSourceCats = [];
                 }
             });
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPackages);
+        } else {
+            loadPackages();
+        }
 
         /* ── 鬆散欄位取值 ── */
         function getField(row, keys) {
