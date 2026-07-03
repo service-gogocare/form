@@ -3,7 +3,7 @@
  * 部署 Apps Script Web App 後，把網址貼到 API_BASE_URL。
  */
 (function (global) {
-  var API_BASE_URL = 'PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE';
+  var API_BASE_URL = 'https://script.google.com/macros/s/AKfycbzkXVNiRteXl7NafcOH-CMqMnHxRkBXZbWZvL2EM0DUXfeM_NAKelQirsLNbwke0N8r/exec';
 
   function buildUrl(action) {
     return API_BASE_URL + '?action=' + encodeURIComponent(action);

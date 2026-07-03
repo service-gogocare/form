@@ -116,8 +116,15 @@
         ? '再 ' + formatNumber(course.nextTier.threshold - course.total) + ' 人次解鎖 ' + course.nextTier.label
         : '已達最高優惠！';
 
+      var coverHtml = course.imageUrl
+        ? '<a class="course-cover-link" href="' + course.url + '" target="_blank" rel="noopener noreferrer" aria-label="前往「' + course.name + '」課程頁面">' +
+          '<img class="course-cover" src="' + course.imageUrl + '" alt="' + course.name + '" loading="lazy" onerror="this.closest(\'.course-cover-link\').style.display=\'none\'" />' +
+          '</a>'
+        : '';
+
       return (
         '<article class="course-card" data-course-id="' + course.id + '">' +
+        coverHtml +
         '<span class="course-tag">' + course.category + '</span>' +
         '<h3 class="course-name">' + course.name + '</h3>' +
         '<div class="course-total">' + formatNumber(course.total) + ' <span>人次集氣</span></div>' +
