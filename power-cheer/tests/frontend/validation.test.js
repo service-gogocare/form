@@ -1,6 +1,6 @@
 const path = require('path');
 const { validateName, validateEmail, formatNumber, getDiscountTierInfo, calcProgressPercent } = require(
-  path.join('..', '..', 'frontend', 'app.js')
+  path.join('..', '..', 'app.js')
 );
 
 describe('前端表單驗證 (與後端 spec.md 第 6 節規則一致)', () => {

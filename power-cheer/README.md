@@ -12,11 +12,10 @@
 
 ```
 power-cheer/
-├── frontend/        GitHub Pages 靜態網站
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js       表單驗證 + 集氣動畫 + 輪詢
-│   └── api.js       呼叫 Apps Script API
+├── 0703.html        GitHub Pages 靜態網站首頁（注意：不是 index.html，網址要帶檔名）
+├── style.css
+├── app.js           表單驗證 + 集氣動畫 + 輪詢
+├── api.js           呼叫 Apps Script API
 ├── backend/         Google Apps Script（clasp 專案根目錄）
 │   ├── Code.gs      doGet / doPost 入口
 │   ├── Api.gs       驗證、24 小時限制、寫入 Sheet
@@ -24,15 +23,19 @@ power-cheer/
 │   ├── Config.gs    全域設定（SPREADSHEET_ID 等）
 │   ├── Setup.gs     一次性建立 PowerLog / Summary 工作表
 │   └── appsscript.json
-├── sheets/          Google Sheet 欄位說明
-├── docs/            SDD 文件
+├── docs/            SDD / 配色 / 活動企劃文件
 └── tests/           Jest 自動化測試（gas-local 模擬 GAS 環境）
 ```
 
+> `0703.html`、`style.css`、`app.js`、`api.js` 原本放在 `frontend/` 子資料夾，後來搬到
+> `power-cheer/` 根目錄下，部署後的網址也跟著從 `.../power-cheer/frontend/0703.html`
+> 變成 `.../power-cheer/0703.html`，改路徑前後別搞混。
+
 ## 1. 建立 Google Sheet
 
-見 [`sheets/README.md`](sheets/README.md)。建立試算表後把 ID 貼到 `backend/Config.gs` 的
-`CONFIG.SPREADSHEET_ID`。
+新增一份 Google Sheet，把試算表網址中的 ID 貼到 `backend/Config.gs` 的
+`CONFIG.SPREADSHEET_ID`；`clasp push` 後到 Apps Script 編輯器執行一次 `Setup.gs` 的
+`initializeSheets`，會自動建立 `PowerLog` / `Summary` 兩個工作表與每堂候選課程的初始列。
 
 ## 2. 用 clasp 建立 / 部署 Apps Script 專案
 
@@ -59,8 +62,8 @@ clasp push
 
 ## 3. 設定前端
 
-把上一步的網址貼到 `frontend/api.js` 的 `API_BASE_URL`，再把 `frontend/` 目錄整個部署到
-GitHub Pages（或任何靜態網站託管）即可。
+把上一步的網址貼到 `api.js` 的 `API_BASE_URL`，再把 `power-cheer/` 底下的
+`0703.html`、`style.css`、`app.js`、`api.js` 部署到 GitHub Pages（或任何靜態網站託管）即可。
 
 ## 4. 執行自動化測試
 
@@ -68,7 +71,7 @@ Google Apps Script 沒有原生的單元測試框架，因此使用
 [gas-local](https://www.npmjs.com/package/gas-local) 在 Node.js 中模擬
 `SpreadsheetApp` / `MailApp` / `LockService` / `Utilities` / `ContentService`，
 直接載入並執行 `backend/*.gs` 的真實程式碼進行測試；前端的表單驗證邏輯則直接以
-Jest 測試 `frontend/app.js` 匯出的 pure function。
+Jest 測試 `app.js` 匯出的 pure function。
 
 ```bash
 cd power-cheer

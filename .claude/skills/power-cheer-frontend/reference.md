@@ -6,11 +6,10 @@
 
 ```
 power-cheer/
-├── frontend/              GitHub Pages 靜態網站（實際部署的網址指向這裡）
-│   ├── 0703.html          頁面結構（注意：不是 index.html，網址要帶檔名）
-│   ├── style.css          樣式，顏色變數在 :root
-│   ├── app.js             前端邏輯：表單驗證、輪詢、課程卡片渲染、折扣進度條計算
-│   └── api.js             呼叫後端 API 的 fetch 封裝，API_BASE_URL 是已部署的 Apps Script 網址
+├── 0703.html              GitHub Pages 靜態網站首頁（注意：不是 index.html，網址要帶檔名）
+├── style.css              樣式，顏色變數在 :root
+├── app.js                 前端邏輯：表單驗證、輪詢、課程卡片渲染、折扣進度條計算
+├── api.js                 呼叫後端 API 的 fetch 封裝，API_BASE_URL 是已部署的 Apps Script 網址
 ├── backend/               Google Apps Script（clasp 專案根目錄）
 │   ├── Code.gs            doGet / doPost 入口，路由 ?action=status / ?action=cheer
 │   ├── Api.gs             驗證規則、24 小時限制、折扣門檻計算、讀寫 Sheet
@@ -53,7 +52,7 @@ power-cheer/
 ```
 
 - `backend/Config.gs`：`CONFIG.DISCOUNT_TIERS`，後端用來決定 API 回傳的「目前已解鎖折扣」。
-- `frontend/app.js` 檔案開頭：獨立一份同名陣列，前端用來畫進度條與文字說明（`calcProgressPercent` / `getDiscountTierInfo`）。
+- `power-cheer/app.js` 檔案開頭：獨立一份同名陣列，前端用來畫進度條與文字說明（`calcProgressPercent` / `getDiscountTierInfo`）。
 - 兩邊都有對應的 Jest 測試（`tests/backend/api.test.js`、`tests/frontend/validation.test.js`）會各自驗證邊界值，改完記得跑 `npm test`。
 
 ## Google Sheet 結構
@@ -87,7 +86,7 @@ power-cheer/
 
 成功回應含 `courseId`、`courseName`、`total`、`currentDiscount`、`nextTier`；24 小時內重複集氣會回傳 `{ success:false, message:"24小時內只能集氣一次", nextTime:"..." }`。
 
-## 驗證規則（`backend/Config.gs` + `Api.gs`，兩邊各自也在 `frontend/app.js` 做前端提示用的複製）
+## 驗證規則（`backend/Config.gs` + `Api.gs`，兩邊各自也在 `power-cheer/app.js` 做前端提示用的複製）
 
 - 姓名：不可空白，≤ 50 字。
 - Email：不可空白，≤ 100 字，需符合基本 email 格式，會自動轉小寫去重。
@@ -117,6 +116,7 @@ power-cheer/
 
 ## 部署相關的坑
 
-1. **前端網址不是 `/form/0703`，而是 `/form/power-cheer/frontend/0703.html`**（含完整路徑與副檔名）。如果之後要換成短網址，需要調整 GitHub Pages 的檔案位置/檔名，屬於結構調整，動手前先跟使用者確認要不要一起處理。
-2. **`clasp push` 之後網址不會馬上生效**，一定要到 Apps Script 的「管理部署作業」把現有部署更新成「新版本」。這是最常見的「怎麼改了都沒用」原因。
-3. `backend/.clasp.json` 含真實 scriptId，已加入根目錄 `.gitignore`（`power-cheer/backend/.clasp.json`），千万不要手動 `git add -f` 加回去。
+1. **前端網址不是 `/form/0703`，而是 `/form/power-cheer/0703.html`**（含完整路徑與副檔名；4 個前端檔案原本在 `frontend/` 子資料夾，後來搬到 `power-cheer/` 根目錄，網址也跟著少了一段 `/frontend`）。如果之後要換成短網址，需要調整 GitHub Pages 的檔案位置/檔名，屬於結構調整，動手前先跟使用者確認要不要一起處理。
+2. **GitHub Pages 部署失敗訊息 `Deployment failed, try again later.`** 若出現在「取得部署狀態」這一步（build/artifact 已經成功），通常是 GitHub 服務端暫時性問題，跟你改了什麼檔案無關；到 Actions 分頁重跑該 job，或再推一次小改動即可。失敗期間網站會繼續顯示上一個成功版本，不會下線。
+3. **`clasp push` 之後網址不會馬上生效**，一定要到 Apps Script 的「管理部署作業」把現有部署更新成「新版本」。這是最常見的「怎麼改了都沒用」原因。
+4. `backend/.clasp.json` 含真實 scriptId，已加入根目錄 `.gitignore`（`power-cheer/backend/.clasp.json`），千万不要手動 `git add -f` 加回去。
