@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOGOCARE 集氣平台</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <img src="assets/logo.png" alt="GOGOCARE" class="logo" onerror="this.style.display='none'" />
+    </header>
+
+    <main class="main">
+      <h1 class="title">積分衝刺月集氣計畫</h1>
+
+      <!-- 活動目的說明 (docs/souce.md) -->
+      <section class="purpose-card">
+        <p class="purpose-text" id="eventPurpose">
+          號召學員為最想上的特色積分課程投票集氣，集氣人次達標即可解鎖課程折扣，一起衝刺 7 月課程銷售轉換！
+        </p>
+        <p class="purpose-period" id="eventPeriod">活動期間：2026/07/06 - 2026/07/31</p>
+        <p class="purpose-rule">
+          折扣機制：滿 100 人次 9 折・滿 200 人次 8 折・滿 300 人次 7 折・滿 400 人次 6 折・滿 500 人次 5 折
+        </p>
+      </section>
+
+      <p class="subtitle">你最想上哪堂特殊積分課？幫它集氣，讓折扣更快解鎖！</p>
+
+      <section class="courses-grid" id="coursesContainer" aria-live="polite">
+        <!-- 課程卡片由 app.js 動態產生 -->
+      </section>
+
+      <div class="update-time" id="updateTime">讀取中...</div>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2026 GOGOCARE</p>
+    </footer>
+  </div>
+
+  <!-- F02：集氣表單 -->
+  <dialog id="cheerDialog" class="cheer-dialog">
+    <form id="cheerForm" class="cheer-form">
+      <h2>為「<span id="dialogCourseName"></span>」集氣</h2>
+      <input type="hidden" id="courseIdInput" />
+
+      <label for="nameInput">姓名</label>
+      <input type="text" id="nameInput" maxlength="50" placeholder="請輸入您的姓名" required />
+      <span class="field-error" id="nameError"></span>
+
+      <label for="emailInput">Email</label>
+      <input type="email" id="emailInput" maxlength="100" placeholder="請輸入您的 Email" required />
+      <span class="field-error" id="emailError"></span>
+
+      <div class="form-message" id="formMessage"></div>
+
+      <div class="dialog-actions">
+        <button type="button" id="cancelBtn" class="btn-secondary">取消</button>
+        <button type="submit" id="submitBtn" class="btn-primary">送出集氣</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- F04：成功集氣 -->
+  <div id="successOverlay" class="success-overlay hidden">
+    <div class="success-card">
+      <div class="hearts">❤️❤️❤️</div>
+      <h2>🎉 集氣成功</h2>
+      <p>感謝您為「<span id="successCourseName"></span>」集氣</p>
+      <p class="success-total">目前累積 <span id="successTotal">0</span> 人次</p>
+      <p class="success-discount" id="successDiscount"></p>
+      <button id="closeSuccessBtn" class="btn-primary" type="button">關閉</button>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
