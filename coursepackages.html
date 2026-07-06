@@ -48,6 +48,10 @@
             overflow-x: hidden;
         }
 
+        #measure-wrapper {
+            width: 100%;
+        }
+
         body {
             background: var(--bg);
             font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
@@ -841,6 +845,7 @@
         <div class="loading-text">正在讀取最新套餐資訊...</div>
     </div>
 
+    <div id="measure-wrapper">
     <!-- 主體表單 -->
     <div id="formView">
         <!-- Hero 橫幅 -->
@@ -970,6 +975,7 @@
                 <i class="fa-solid fa-rotate-left me-1"></i> 填寫新表單
             </button>
         </div>
+    </div>
     </div>
 
     <script>
@@ -1463,20 +1469,10 @@ let currentGroup = '';
   let heightNotifyTimer = null;
 
   function getActualContentHeight() {
-    let bottom = 0;
-    const children = Array.from(document.body.children);
-
-    children.forEach(function(el) {
-      if (el.tagName === "SCRIPT") return;
-      const style = window.getComputedStyle(el);
-      if (style.display === "none") return;
-
-      const rect = el.getBoundingClientRect();
-      if (rect.height <= 0) return;
-      bottom = Math.max(bottom, rect.bottom + window.scrollY);
-    });
-
-    return Math.ceil(bottom + 20);
+    const wrapper = document.getElementById("measure-wrapper");
+    if (!wrapper) return 0;
+    const rect = wrapper.getBoundingClientRect();
+    return Math.ceil(rect.bottom + window.scrollY);
   }
 
   function notifyHeight(force) {
@@ -1516,11 +1512,18 @@ let currentGroup = '';
   const observer = new MutationObserver(function() {
     scheduleNotify(false);
   });
-  observer.observe(document.body, {
+  const wrapper = document.getElementById("measure-wrapper");
+  observer.observe(wrapper || document.body, {
     childList: true,
     subtree: true,
     attributes: true
   });
+
+  if (window.ResizeObserver && wrapper) {
+    new ResizeObserver(function() {
+      scheduleNotify(false);
+    }).observe(wrapper);
+  }
 
   window.scheduleCoursePackagesHeightNotify = scheduleNotify;
 })();
