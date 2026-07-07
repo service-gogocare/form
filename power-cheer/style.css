@@ -83,6 +83,7 @@ body {
   width: 90%;
   height: auto;
   display: block;
+  transform: translateX(-10px);
 }
 
 /* ==================
@@ -169,14 +170,17 @@ body {
 .courses-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 24px;
+  /* 為了不讓兩欄在大螢幕看起來太寬，可以設定一個最大寬度置中 */
+  max-width: 800px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 600px) {
   .courses-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    max-width: 380px;
   }
 }
 
