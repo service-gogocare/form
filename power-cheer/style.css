@@ -99,10 +99,23 @@ body {
 }
 
 /* ==================
+   活動資訊框（白底半透明 + 框線）
+   ================== */
+.event-box {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid var(--color-primary-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 28px 16px;
+  margin: 12px 0 24px;
+}
+
+/* ==================
    活動說明區
    ================== */
 .info-section {
-  margin: 12px 0 20px;
+  margin: 0 0 12px;
 }
 
 .info-desc {
@@ -122,8 +135,14 @@ body {
    行動呼籲
    ================== */
 .cta-section {
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
+
+.event-box + * {
+  /* 確保 event-box 下方元素間距正確 */
+  margin-top: 0;
+}
+
 
 .cta-title {
   font-size: clamp(18px, 3.5vw, 24px);
@@ -254,7 +273,7 @@ body {
   display: inline-block;
   background: var(--color-bg-warm);
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 500;
   padding: 3px 10px;
   border-radius: 999px;
@@ -386,6 +405,7 @@ body {
    Dialog (集氣表單)
    ================== */
 .cheer-dialog {
+  margin: auto;
   border: none;
   border-radius: var(--radius-lg);
   padding: 0;

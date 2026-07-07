@@ -13,9 +13,6 @@ var CONFIG = {
   SHEET_SUMMARY: 'Summary',
 
   EVENT_NAME: '積分衝刺月集氣計畫',
-  EVENT_PURPOSE:
-    '號召學員為最想上的特色積分課程投票集氣，集氣人次達標即可解鎖課程折扣，一起衝刺 7 月課程銷售轉換！',
-  EVENT_PERIOD: '2026/07/06 - 2026/07/31',
 
   // 三、未綁定學員方案：熱門課程降價集氣（5 選 1，取自特殊積分 9 堂課，無教師分潤課程）
   // url / imageUrl 取自 GOGOCare 課程平台，供前端封面圖點擊導向課程頁面使用
@@ -51,13 +48,12 @@ var CONFIG = {
     },
   ],
 
-  // 折扣機制：滿 100 人次打 9 折，滿 200 人次打 8 折... 滿 500 人次打 5 折
+  // 折扣機制：滿 100 人次打 8 折，滿 200 人次打 7 折，滿 300 人次打 6 折，滿 400 人次打 5 折
   DISCOUNT_TIERS: [
-    { threshold: 100, label: '9折' },
-    { threshold: 200, label: '8折' },
-    { threshold: 300, label: '7折' },
-    { threshold: 400, label: '6折' },
-    { threshold: 500, label: '5折' },
+    { threshold: 100, label: '8折' },
+    { threshold: 200, label: '7折' },
+    { threshold: 300, label: '6折' },
+    { threshold: 400, label: '5折' },
   ],
 
   // F03：24 小時內同一 Email 只能集氣一次（不分課程，全站共用一次額度）

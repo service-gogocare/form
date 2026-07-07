@@ -32,8 +32,6 @@ function getStatus() {
   return {
     success: true,
     eventName: CONFIG.EVENT_NAME,
-    eventPurpose: CONFIG.EVENT_PURPOSE,
-    eventPeriod: CONFIG.EVENT_PERIOD,
     courses: courses,
     updateTime: formatDateTime_(new Date()),
   };

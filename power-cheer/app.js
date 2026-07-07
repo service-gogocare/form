@@ -10,11 +10,10 @@
 
   // 折扣門檻需與 backend/Config.gs 的 CONFIG.DISCOUNT_TIERS 保持一致
   var DISCOUNT_TIERS = [
-    { threshold: 100, label: '9折' },
-    { threshold: 200, label: '8折' },
-    { threshold: 300, label: '7折' },
-    { threshold: 400, label: '6折' },
-    { threshold: 500, label: '5折' },
+    { threshold: 100, label: '8折' },
+    { threshold: 200, label: '7折' },
+    { threshold: 300, label: '6折' },
+    { threshold: 400, label: '5折' },
   ];
 
   // ---------------------------------------------------------------------
@@ -81,8 +80,6 @@
   // DOM 邏輯（僅在瀏覽器環境執行，Node 測試環境會跳過）
   // ---------------------------------------------------------------------
   function initDom() {
-    var eventPurpose = document.getElementById('eventPurpose');
-    var eventPeriod = document.getElementById('eventPeriod');
     var coursesContainer = document.getElementById('coursesContainer');
     var updateTime = document.getElementById('updateTime');
 
@@ -215,8 +212,6 @@
       try {
         var data = await window.CheerAPI.fetchStatus();
         if (data && data.success) {
-          if (data.eventPurpose && eventPurpose) eventPurpose.textContent = data.eventPurpose;
-          if (data.eventPeriod && eventPeriod) eventPeriod.textContent = '活動期間：' + data.eventPeriod;
           renderCourses(data.courses || []);
           updateTime.textContent = '最後更新：' + data.updateTime;
         }
