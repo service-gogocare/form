@@ -41,13 +41,7 @@ var CONFIG = {
       url: 'https://www.gogocare.com.tw/tw/course/detail/C20260701101830001',
       imageUrl: 'https://www.gogocare.com.tw/UserFiles/course/C20260701101830001_pic.jpg',
     },
-    {
-      id: 'course-4',
-      name: '性別主流化及工作中的性別意識',
-      category: '專業倫理、性別敏感度',
-      url: 'https://www.gogocare.com.tw/tw/course/detail/C20260605104113001',
-      imageUrl: 'https://www.gogocare.com.tw/UserFiles/course/C20260605104113001_pic.jpg',
-    },
+
     {
       id: 'course-5',
       name: '緊急應變-一氧化碳中毒及天然災害處置',

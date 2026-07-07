@@ -114,7 +114,7 @@
       if (course.currentDiscount) {
         currentLine = '<div class="discount-current">已解鎖 ' + course.currentDiscount + '</div>';
       } else {
-        currentLine = '<div class="discount-none">尚未解鎖折扣</div>';
+        currentLine = '';
       }
 
       if (course.nextTier) {

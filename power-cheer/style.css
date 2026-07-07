@@ -28,8 +28,8 @@
   --color-white: #ffffff;
 
   /* 集氣按鈕 */
-  --color-cta: #4654a0;
-  --color-cta-hover: #353f7d;
+  --color-cta: #ff5757;
+  --color-cta-hover: #e04444;
 
   /* 錯誤 / 紅色 */
   --color-error: #d94545;
@@ -344,20 +344,19 @@ body {
   border: none;
   cursor: pointer;
   background: var(--color-cta);
-  color: var(--color-white);
+  color: #fff;
   font-size: 15px;
   font-weight: 700;
-  padding: 11px 20px;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(255, 87, 87, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   margin-top: auto;
-  letter-spacing: 0.5px;
 }
 
 .cheer-btn:hover {
-  background: var(--color-cta-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(70, 84, 160, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 87, 87, 0.5);
 }
 
 .cheer-btn:active {
