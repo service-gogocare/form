@@ -33,8 +33,8 @@ GOGOCARE「積分衝刺月集氣計畫」的執行頁面：學員從 5 堂候選
 | 使用者想改的東西 | 要改的檔案 |
 | --- | --- |
 | 頁面文字、標題、活動說明、期間 | `power-cheer/0703.html`（畫面結構/預設文字）＋ `backend/Config.gs` 的 `EVENT_PURPOSE` / `EVENT_PERIOD`（頁面載入後會被這個蓋過去） |
-| 課程名稱、分類標籤、課程連結、封面圖 | `backend/Config.gs` 的 `CONFIG.COURSES` 陣列（**只有這裡**，前端是動態抓資料，不用改 HTML） |
-| 新增 / 移除候選課程 | `backend/Config.gs` 的 `CONFIG.COURSES`，改完要重新執行一次 `backend/Setup.gs` 的 `initializeSheets`（見下方注意事項） |
+| 課程名稱、分類標籤、課程連結、封面圖 | **同時**改 `backend/Config.gs` 的 `CONFIG.COURSES` 和 `power-cheer/0703.html` 對應的課程卡片區塊（2026/07 起兩份都有，見下方「重要」第 2 點） |
+| 新增 / 移除候選課程 | `backend/Config.gs` 的 `CONFIG.COURSES` ＋ `power-cheer/0703.html` 的課程卡片區塊（兩邊都要改），改完還要重新執行一次 `backend/Setup.gs` 的 `initializeSheets`（見下方注意事項） |
 | 折扣門檻（滿多少人打幾折） | **同時**改 `backend/Config.gs` 的 `CONFIG.DISCOUNT_TIERS` 和 `power-cheer/app.js` 開頭的 `DISCOUNT_TIERS`（兩份要一模一樣，見下方「重要」） |
 | 顏色、字體大小、卡片樣式、版面 | `power-cheer/style.css`（顏色變數集中在檔案最上面的 `:root`，對照 `docs/design.md`） |
 | 表單欄位限制（姓名/Email 長度、24 小時限制） | `backend/Config.gs`（`NAME_MAX_LENGTH`、`EMAIL_MAX_LENGTH`、`THROTTLE_HOURS`）—— 改這裡風險較高，動手前務必跟使用者確認為什麼要改 |
@@ -43,7 +43,7 @@ GOGOCARE「積分衝刺月集氣計畫」的執行頁面：學員從 5 堂候選
 ## 重要：兩份必須保持一致的資料
 
 1. **折扣門檻 `DISCOUNT_TIERS`**：`backend/Config.gs` 和 `power-cheer/app.js` 各存了一份一模一樣的陣列（前端用來畫進度條，屬於暫時性的重複設計）。改一邊沒改另一邊，會出現「頁面顯示的折扣」跟「後端實際判定的折扣」對不上的 bug。**只要改門檻，兩個檔案都要改。**
-2. **課程資料只在後端**：`power-cheer/0703.html` 沒有寫死任何課程名稱或圖片，都是頁面載入時向後端 API 要資料再畫出來的。所以新增/修改課程只需要改 `backend/Config.gs`，改完要 `clasp push` 才會反映到頁面上（純改前端檔案不會生效）。
+2. **課程資料現在有兩份**（2026/07 起）：`power-cheer/0703.html` 已靜態寫入 5 張課程卡片（讓頁面一打開就能顯示，不依賴 API），同時 `backend/Config.gs` 的 `CONFIG.COURSES` 仍然保留（後端驗證集氣、計算折扣用）。**只要新增/修改/移除課程，兩個檔案都要改**，少改一個就會出現「頁面顯示舊課程」或「集氣按下去報錯」的 bug。改 `0703.html` 用 `git push`；改 `Config.gs` 用 `clasp push` + 更新部署版本。詳細步驟見 `docs/課程修改操作說明.md`。
 
 ## 常見任務 SOP
 

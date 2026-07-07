@@ -3,31 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GOGOCARE 集氣平台</title>
+  <title>GOGOCARE 積分衝刺月 集氣計畫</title>
+  <meta name="description" content="GOGOCARE 積分衝刺月集氣計畫 - 為最想上的特殊積分課投票集氣，集氣越多折扣越大！" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="page">
-    <header class="header">
-      <img src="assets/logo.png" alt="GOGOCARE" class="logo" onerror="this.style.display='none'" />
+
+    <!-- 主視覺 Banner -->
+    <header class="banner-section">
+      <img src="BANNER.png" alt="積分衝刺月 集氣計畫" class="banner-img" />
     </header>
 
     <main class="main">
-      <h1 class="title">積分衝刺月集氣計畫</h1>
-
-      <!-- 活動目的說明 (docs/souce.md) -->
-      <section class="purpose-card">
-        <p class="purpose-text" id="eventPurpose">
-          號召學員為最想上的特色積分課程投票集氣，集氣人次達標即可解鎖課程折扣，一起衝刺 7 月課程銷售轉換！
+      <!-- 活動說明區 -->
+      <section class="info-section">
+        <p class="info-desc" id="eventPurpose">
+          來替最想上的特殊積分課集氣！ 集氣越多，課程折扣越大！快來招呼好友一起為長照積分換好康
         </p>
-        <p class="purpose-period" id="eventPeriod">活動期間：2026/07/06 - 2026/07/31</p>
-        <p class="purpose-rule">
-          折扣機制：滿 100 人次 9 折・滿 200 人次 8 折・滿 300 人次 7 折・滿 400 人次 6 折・滿 500 人次 5 折
+        <p class="info-period" id="eventPeriod">活動期間：2026 / 07 / 07 - 2026 / 07 / 31</p>
+      </section>
+
+      <!-- 行動呼籲 -->
+      <section class="cta-section">
+        <h2 class="cta-title">你最想上哪堂特殊積分課？幫它集氣，讓折扣更快解鎖！</h2>
+        <p class="cta-rule">
+          折扣機制　滿100人次
+          <span class="rule-divider">｜</span>8折滿200人次
+          <span class="rule-divider">｜</span>7折滿300人次
+          <span class="rule-divider">｜</span>6折滿400人次 5折
         </p>
       </section>
 
-      <p class="subtitle">你最想上哪堂特殊積分課？幫它集氣，讓折扣更快解鎖！</p>
-
+      <!-- 課程卡片 -->
       <section class="courses-grid" id="coursesContainer" aria-live="polite">
         <!-- 課程卡片：資料來源 backend/Config.gs → CONFIG.COURSES（以下為靜態備援，app.js 載入後會更新數字）-->
 
@@ -40,8 +51,8 @@
           <h3 class="course-name">消防-火災意外事件處置與應變</h3>
           <div class="course-total" id="total-course-1">0 <span>人次集氣</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-course-1" style="width:0%"></div></div>
-          <p class="course-discount" id="discount-course-1">尚未達標，再集氣 100 人次可解鎖 9折</p>
-          <button class="cheer-btn" data-course-id="course-1" data-course-name="消防-火災意外事件處置與應變" type="button">❤️ 為這堂課集氣</button>
+          <p class="course-discount" id="discount-course-1">尚未解鎖折扣，再 100 人次解鎖 9折</p>
+          <button class="cheer-btn" data-course-id="course-1" data-course-name="消防-火災意外事件處置與應變" type="button">為這堂課集氣</button>
         </div>
 
         <!-- course-2 -->
@@ -53,8 +64,8 @@
           <h3 class="course-name">針扎預防及通報處理流程</h3>
           <div class="course-total" id="total-course-2">0 <span>人次集氣</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-course-2" style="width:0%"></div></div>
-          <p class="course-discount" id="discount-course-2">尚未達標，再集氣 100 人次可解鎖 9折</p>
-          <button class="cheer-btn" data-course-id="course-2" data-course-name="針扎預防及通報處理流程" type="button">❤️ 為這堂課集氣</button>
+          <p class="course-discount" id="discount-course-2">尚未解鎖折扣，再 100 人次解鎖 9折</p>
+          <button class="cheer-btn" data-course-id="course-2" data-course-name="針扎預防及通報處理流程" type="button">為這堂課集氣</button>
         </div>
 
         <!-- course-3 -->
@@ -66,8 +77,8 @@
           <h3 class="course-name">居家感染控制概論</h3>
           <div class="course-total" id="total-course-3">0 <span>人次集氣</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-course-3" style="width:0%"></div></div>
-          <p class="course-discount" id="discount-course-3">尚未達標，再集氣 100 人次可解鎖 9折</p>
-          <button class="cheer-btn" data-course-id="course-3" data-course-name="居家感染控制概論" type="button">❤️ 為這堂課集氣</button>
+          <p class="course-discount" id="discount-course-3">尚未解鎖折扣，再 100 人次解鎖 9折</p>
+          <button class="cheer-btn" data-course-id="course-3" data-course-name="居家感染控制概論" type="button">為這堂課集氣</button>
         </div>
 
         <!-- course-4 -->
@@ -79,8 +90,8 @@
           <h3 class="course-name">性別主流化及工作中的性別意識</h3>
           <div class="course-total" id="total-course-4">0 <span>人次集氣</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-course-4" style="width:0%"></div></div>
-          <p class="course-discount" id="discount-course-4">尚未達標，再集氣 100 人次可解鎖 9折</p>
-          <button class="cheer-btn" data-course-id="course-4" data-course-name="性別主流化及工作中的性別意識" type="button">❤️ 為這堂課集氣</button>
+          <p class="course-discount" id="discount-course-4">尚未解鎖折扣，再 100 人次解鎖 9折</p>
+          <button class="cheer-btn" data-course-id="course-4" data-course-name="性別主流化及工作中的性別意識" type="button">為這堂課集氣</button>
         </div>
 
         <!-- course-5 -->
@@ -92,8 +103,8 @@
           <h3 class="course-name">緊急應變-一氧化碳中毒及天然災害處置</h3>
           <div class="course-total" id="total-course-5">0 <span>人次集氣</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-course-5" style="width:0%"></div></div>
-          <p class="course-discount" id="discount-course-5">尚未達標，再集氣 100 人次可解鎖 9折</p>
-          <button class="cheer-btn" data-course-id="course-5" data-course-name="緊急應變-一氧化碳中毒及天然災害處置" type="button">❤️ 為這堂課集氣</button>
+          <p class="course-discount" id="discount-course-5">尚未解鎖折扣，再 100 人次解鎖 9折</p>
+          <button class="cheer-btn" data-course-id="course-5" data-course-name="緊急應變-一氧化碳中毒及天然災害處置" type="button">為這堂課集氣</button>
         </div>
       </section>
 

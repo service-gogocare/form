@@ -107,19 +107,43 @@
     var pollTimer = null;
     var latestCourses = [];
 
+    function buildDiscountHtml(course) {
+      var currentLine = '';
+      var nextLine = '';
+
+      if (course.currentDiscount) {
+        currentLine = '<div class="discount-current">已解鎖 ' + course.currentDiscount + '</div>';
+      } else {
+        currentLine = '<div class="discount-none">尚未解鎖折扣</div>';
+      }
+
+      if (course.nextTier) {
+        nextLine = '<div class="discount-next">再 ' + formatNumber(course.nextTier.threshold - course.total) + ' 人次解鎖 ' + course.nextTier.label + '</div>';
+      } else {
+        nextLine = '<div class="discount-next discount-max">已達最高優惠！</div>';
+      }
+
+      return currentLine + nextLine;
+    }
+
+    function isMaxDiscount(course) {
+      var info = getDiscountTierInfo(course.total);
+      return !info.next; // 無下一階 = 已達最高折扣 (5折)
+    }
+
     function courseCardHtml(course) {
       var pct = calcProgressPercent(course.total);
-      var discountText = course.currentDiscount
-        ? '目前已解鎖 <strong>' + course.currentDiscount + '</strong>'
-        : '尚未解鎖折扣';
-      var nextText = course.nextTier
-        ? '再 ' + formatNumber(course.nextTier.threshold - course.total) + ' 人次解鎖 ' + course.nextTier.label
-        : '已達最高優惠！';
+      var maxReached = isMaxDiscount(course);
+
+      var badgeHtml = '<img class="cover-badge' + (maxReached ? '' : ' hidden') + '" src="ICON.png" alt="達標" />';
 
       var coverHtml = course.imageUrl
-        ? '<a class="course-cover-link" href="' + course.url + '" target="_blank" rel="noopener noreferrer" aria-label="前往「' + course.name + '」課程頁面">' +
+        ? '<div class="course-cover-wrap">' +
+          '<a class="course-cover-link" href="' + course.url + '" target="_blank" rel="noopener noreferrer" aria-label="前往「' + course.name + '」課程頁面">' +
           '<img class="course-cover" src="' + course.imageUrl + '" alt="' + course.name + '" loading="lazy" onerror="this.closest(\'.course-cover-link\').style.display=\'none\'" />' +
-          '</a>'
+          '</a>' +
+          badgeHtml +
+          '</div>'
         : '';
 
       return (
@@ -129,14 +153,54 @@
         '<h3 class="course-name">' + course.name + '</h3>' +
         '<div class="course-total">' + formatNumber(course.total) + ' <span>人次集氣</span></div>' +
         '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-        '<div class="course-discount">' + discountText + ' · ' + nextText + '</div>' +
+        '<div class="course-discount">' + buildDiscountHtml(course) + '</div>' +
         '<button type="button" class="cheer-btn course-cheer-btn" data-course-id="' + course.id + '" data-course-name="' + course.name + '">為這堂課集氣</button>' +
         '</article>'
       );
     }
 
+    // 局部更新：僅更新數字與進度，不重繪整個卡片區（避免畫面閃爍）
+    function updateExistingCards(courses) {
+      var updated = true;
+      courses.forEach(function (course) {
+        var card = coursesContainer.querySelector('[data-course-id="' + course.id + '"]');
+        if (!card) { updated = false; return; }
+
+        // 如果卡片缺少 cover-wrap（靜態 HTML 沒有此結構），需要完整重繪
+        var coverWrap = card.querySelector('.course-cover-wrap');
+        if (!coverWrap) { updated = false; return; }
+
+        var totalEl = card.querySelector('.course-total');
+        if (totalEl) totalEl.innerHTML = formatNumber(course.total) + ' <span>人次集氣</span>';
+
+        var pct = calcProgressPercent(course.total);
+        var fillEl = card.querySelector('.progress-fill');
+        if (fillEl) fillEl.style.width = pct + '%';
+
+        var discountEl = card.querySelector('.course-discount');
+        if (discountEl) discountEl.innerHTML = buildDiscountHtml(course);
+
+        // 達標徽章顯示/隱藏
+        var badge = card.querySelector('.cover-badge');
+        if (badge) {
+          if (isMaxDiscount(course)) {
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+      });
+      return updated;
+    }
+
     function renderCourses(courses) {
       latestCourses = courses;
+
+      // 如果卡片已存在，就局部更新；否則才整個重繪
+      if (coursesContainer.children.length > 0 && updateExistingCards(courses)) {
+        return;
+      }
+
       coursesContainer.innerHTML = courses.map(courseCardHtml).join('');
 
       var buttons = coursesContainer.querySelectorAll('.course-cheer-btn');

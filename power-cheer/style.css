@@ -1,126 +1,197 @@
-:root {
-  --color-primary: #248dc5;
-  --color-primary-dark: #1c6f9c;
-  --color-secondary: #a8acd6;
-  --color-highlight: #eee800;
-  --color-gray-light: #dcdddd;
-  --color-gray: #9fa0a0;
-  --color-dark: #2a2a2a;
-  --color-accent: #ff5757;
+/* =============================================
+   GOGOCARE 集氣平台 – 新版色系 & 排版
+   色系：奶油黃背景 + 靛藍主色 + 橘黃點綴
+   ============================================= */
 
-  --radius-lg: 20px;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+
+:root {
+  /* 主色系 */
+  --color-primary: #4654a0;
+  --color-primary-dark: #353f7d;
+  --color-primary-light: #6b75b8;
+  --color-secondary: #5b68c0;
+
+  /* 點綴 / 強調色 */
+  --color-accent: #e8a420;
+  --color-accent-light: #f5c451;
+  --color-accent-dark: #c78c12;
+
+  /* 背景 */
+  --color-bg: #fdf5e0;
+  --color-bg-warm: #fef9ed;
+
+  /* 中性色 */
+  --color-gray-light: #e8e4db;
+  --color-gray: #9e9a93;
+  --color-dark: #2a2a2a;
+  --color-white: #ffffff;
+
+  /* 集氣按鈕 */
+  --color-cta: #4654a0;
+  --color-cta-hover: #353f7d;
+
+  /* 錯誤 / 紅色 */
+  --color-error: #d94545;
+
+  /* 圓角 */
+  --radius-lg: 18px;
   --radius-md: 12px;
-  --shadow-card: 0 12px 32px rgba(36, 141, 197, 0.18);
+  --radius-sm: 8px;
+
+  /* 陰影 */
+  --shadow-card: 0 6px 24px rgba(70, 84, 160, 0.10);
+  --shadow-card-hover: 0 10px 32px rgba(70, 84, 160, 0.18);
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
   font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
   color: var(--color-dark);
-  background: linear-gradient(160deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background: var(--color-bg);
 }
 
+/* ==================
+   Page Container
+   ================== */
 .page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 16px 48px;
 }
 
-.header {
+/* ==================
+   Banner
+   ================== */
+.banner-section {
   width: 100%;
-  max-width: 720px;
   display: flex;
   justify-content: center;
-  padding: 16px 0 8px;
+  padding: 36px 16px 12px;
+  background: var(--color-bg);
 }
 
-.logo {
-  height: 40px;
+.banner-img {
+  max-width: 620px;
+  width: 90%;
+  height: auto;
+  display: block;
 }
 
+/* ==================
+   Main
+   ================== */
 .main {
   width: 100%;
-  max-width: 960px;
+  max-width: 1080px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-top: 24px;
+  padding: 0 20px 48px;
 }
 
-.title {
-  color: #fff;
-  font-size: clamp(24px, 5vw, 34px);
-  margin: 0 0 8px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+/* ==================
+   活動說明區
+   ================== */
+.info-section {
+  margin: 12px 0 20px;
 }
 
-.subtitle {
-  color: #fff;
-  opacity: 0.9;
-  margin: 0 0 28px;
+.info-desc {
   font-size: 15px;
+  line-height: 1.75;
+  color: var(--color-dark);
+  margin-bottom: 6px;
 }
 
-/* 活動目的說明 (docs/souce.md) */
-.purpose-card {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  margin-bottom: 12px;
-  color: #fff;
-}
-
-.purpose-text {
-  margin: 0 0 8px;
+.info-period {
   font-size: 15px;
-  line-height: 1.6;
-}
-
-.purpose-period {
-  margin: 0 0 6px;
-  font-size: 13px;
-  opacity: 0.9;
-}
-
-.purpose-rule {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-highlight);
   font-weight: 600;
+  color: var(--color-dark);
 }
 
+/* ==================
+   行動呼籲
+   ================== */
+.cta-section {
+  margin-bottom: 28px;
+}
+
+.cta-title {
+  font-size: clamp(18px, 3.5vw, 24px);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.cta-rule {
+  font-size: 14px;
+  color: var(--color-dark);
+  line-height: 1.8;
+}
+
+.rule-divider {
+  color: var(--color-gray);
+  margin: 0 2px;
+}
+
+/* ==================
+   課程卡片網格
+   ================== */
 .courses-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
+@media (max-width: 900px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+  }
+}
+
+/* ==================
+   Course Card
+   ================== */
 .course-card {
-  background: #fff;
+  background: var(--color-white);
+  border: 2px dashed var(--color-primary-light);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 24px 20px;
+  padding: 0 0 20px;
   text-align: left;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* 封面圖 */
 .course-cover-link {
   display: block;
-  margin: -24px -20px 14px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   overflow: hidden;
 }
 
@@ -130,115 +201,202 @@ body {
   object-fit: cover;
   display: block;
   background: var(--color-gray-light);
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }
 
 .course-cover-link:hover .course-cover {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
+/* 封面圖容器（用於定位達標徽章） */
+.course-cover-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 達標徽章 */
+.cover-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  height: auto;
+  z-index: 2;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.cover-badge.hidden {
+  display: none;
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 卡片內容 padding */
+.course-card .course-tag,
+.course-card .course-name,
+.course-card .course-total,
+.course-card .progress-bar,
+.course-card .course-discount,
+.course-card .cheer-btn {
+  margin-left: 18px;
+  margin-right: 18px;
+}
+
+/* 課程標籤 */
 .course-tag {
   align-self: flex-start;
-  background: #fffbee;
-  color: #6b4900;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  margin-bottom: 10px;
-}
-
-.course-name {
-  margin: 0 0 12px;
-  font-size: 16px;
-  color: var(--color-dark);
-  min-height: 44px;
-}
-
-.course-total {
-  font-size: 28px;
-  font-weight: 800;
+  display: inline-block;
+  background: var(--color-bg-warm);
   color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--color-primary-light);
+}
+
+/* 課程名稱 */
+.course-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+  min-height: 42px;
   margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* 集氣人次 */
+.course-total {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+  line-height: 1;
 }
 
 .course-total span {
   font-size: 13px;
   font-weight: 400;
   color: var(--color-gray);
+  margin-left: 4px;
 }
 
+/* 進度條 */
 .progress-bar {
-  width: 100%;
-  height: 8px;
+  width: auto;
+  height: 7px;
   border-radius: 999px;
   background: var(--color-gray-light);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-highlight));
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent-light));
+  border-radius: 999px;
   transition: width 0.6s ease;
 }
 
+/* 折扣訊息 */
 .course-discount {
   font-size: 12px;
   color: var(--color-dark);
-  margin-bottom: 16px;
-  min-height: 32px;
+  margin-bottom: 14px;
+  min-height: 44px;
+  line-height: 1.5;
 }
 
-.update-time {
+.discount-current {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+
+.discount-none {
+  font-size: 13px;
+  color: var(--color-gray);
+}
+
+.discount-next {
   font-size: 12px;
-  color: #fff;
-  opacity: 0.85;
-  margin-top: 4px;
+  color: var(--color-dark);
+  font-weight: 400;
 }
 
+.discount-max {
+  color: var(--color-accent-dark);
+  font-weight: 600;
+}
+
+/* 集氣按鈕 */
 .cheer-btn {
   border: none;
   cursor: pointer;
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--color-cta);
+  color: var(--color-white);
   font-size: 15px;
   font-weight: 700;
-  padding: 12px 20px;
-  border-radius: 999px;
-  box-shadow: 0 8px 20px rgba(255, 87, 87, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
   margin-top: auto;
+  letter-spacing: 0.5px;
 }
 
 .cheer-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(255, 87, 87, 0.5);
+  background: var(--color-cta-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(70, 84, 160, 0.3);
 }
 
 .cheer-btn:active {
   transform: translateY(0);
 }
 
+/* ==================
+   更新時間
+   ================== */
+.update-time {
+  font-size: 12px;
+  color: var(--color-gray);
+  margin-top: 4px;
+}
+
+/* ==================
+   Footer
+   ================== */
 .footer {
   margin-top: auto;
-  padding-top: 32px;
-  color: #fff;
-  opacity: 0.75;
+  padding: 24px 0 32px;
+  color: var(--color-gray);
   font-size: 12px;
 }
 
-/* Dialog */
+/* ==================
+   Dialog (集氣表單)
+   ================== */
 .cheer-dialog {
   border: none;
   border-radius: var(--radius-lg);
   padding: 0;
   width: min(90vw, 420px);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
 }
 
 .cheer-dialog::backdrop {
-  background: rgba(42, 42, 42, 0.55);
+  background: rgba(42, 42, 42, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 .cheer-form {
@@ -251,12 +409,14 @@ body {
 .cheer-form h2 {
   margin: 0 0 16px;
   color: var(--color-primary-dark);
+  font-size: 18px;
 }
 
 .cheer-form label {
   font-size: 14px;
   color: var(--color-dark);
   margin-top: 10px;
+  font-weight: 500;
 }
 
 .cheer-form input {
@@ -265,22 +425,25 @@ body {
   padding: 10px 12px;
   font-size: 15px;
   outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
 }
 
 .cheer-form input:focus {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(70, 84, 160, 0.12);
 }
 
 .field-error {
   min-height: 16px;
   font-size: 12px;
-  color: var(--color-accent);
+  color: var(--color-error);
 }
 
 .form-message {
   min-height: 18px;
   font-size: 13px;
-  color: var(--color-accent);
+  color: var(--color-error);
   margin-top: 4px;
 }
 
@@ -295,15 +458,21 @@ body {
 .btn-secondary {
   border: none;
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   padding: 10px 24px;
   font-size: 14px;
   font-weight: 600;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .btn-primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
 }
 
 .btn-primary:disabled {
@@ -316,11 +485,18 @@ body {
   color: var(--color-dark);
 }
 
-/* Success overlay */
+.btn-secondary:hover {
+  background: #d8d4cb;
+}
+
+/* ==================
+   Success Overlay
+   ================== */
 .success-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(42, 42, 42, 0.55);
+  background: rgba(42, 42, 42, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,13 +508,13 @@ body {
 }
 
 .success-card {
-  background: #fff;
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: 36px 28px;
   text-align: center;
   width: min(90vw, 360px);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
-  animation: pop-in 0.25s ease;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .hearts {
@@ -363,6 +539,9 @@ body {
   margin-top: 4px;
 }
 
+/* ==================
+   Animations
+   ================== */
 @keyframes heart-beat {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.15); }
@@ -371,4 +550,73 @@ body {
 @keyframes pop-in {
   from { transform: scale(0.85); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+/* ==================
+   淡入動畫 (卡片載入)
+   ================== */
+.course-card {
+  animation: card-fade-in 0.4s ease both;
+}
+
+.course-card:nth-child(1) { animation-delay: 0.05s; }
+.course-card:nth-child(2) { animation-delay: 0.1s; }
+.course-card:nth-child(3) { animation-delay: 0.15s; }
+.course-card:nth-child(4) { animation-delay: 0.2s; }
+.course-card:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================
+   Purpose Card (保留備援, 已不在新版 HTML 使用)
+   ================== */
+.purpose-card {
+  width: 100%;
+  background: rgba(70, 84, 160, 0.08);
+  border: 1px solid rgba(70, 84, 160, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+}
+
+.purpose-text {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.purpose-period {
+  margin: 0 0 6px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.purpose-rule {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-accent-dark);
+  font-weight: 600;
+}
+
+/* Title & Subtitle (舊版相容) */
+.title {
+  color: var(--color-primary);
+  font-size: clamp(24px, 5vw, 34px);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--color-primary);
+  margin: 0 0 28px;
+  font-size: 15px;
 }
