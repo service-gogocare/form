@@ -18,8 +18,8 @@
   --color-accent-dark: #c78c12;
 
   /* 背景 */
-  --color-bg: #fdf5e0;
-  --color-bg-warm: #fef9ed;
+  --color-bg: #ffe9c4;
+  --color-bg-warm: #fff3e0;
 
   /* 中性色 */
   --color-gray-light: #e8e4db;
@@ -74,7 +74,7 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 36px 16px 12px;
+  padding: 0 16px 12px;
   background: var(--color-bg);
 }
 
