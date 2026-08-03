@@ -393,6 +393,14 @@ body {
   transform: translateY(0);
 }
 
+.cheer-btn:disabled {
+  cursor: not-allowed;
+  background: #bdbdbd;
+  color: #666;
+  box-shadow: none;
+  transform: none;
+}
+
 /* ==================
    更新時間
    ================== */

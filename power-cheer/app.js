@@ -103,6 +103,8 @@
 
     var pollTimer = null;
     var latestCourses = [];
+    // 活動已截止：預設鎖定投票（status API 回傳前的備援狀態），API 回應後會再次確認
+    var votingLocked = true;
 
     function buildDiscountHtml(course) {
       var currentLine = '';
@@ -151,9 +153,16 @@
         '<div class="course-total">' + formatNumber(course.total) + ' <span>人次集氣</span></div>' +
         '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
         '<div class="course-discount">' + buildDiscountHtml(course) + '</div>' +
-        '<button type="button" class="cheer-btn course-cheer-btn" data-course-id="' + course.id + '" data-course-name="' + course.name + '">為這堂課集氣</button>' +
+        cheerButtonHtml(course) +
         '</article>'
       );
+    }
+
+    function cheerButtonHtml(course) {
+      if (votingLocked) {
+        return '<button type="button" class="cheer-btn course-cheer-btn" disabled>投票已截止</button>';
+      }
+      return '<button type="button" class="cheer-btn course-cheer-btn" data-course-id="' + course.id + '" data-course-name="' + course.name + '">為這堂課集氣</button>';
     }
 
     // 局部更新：僅更新數字與進度，不重繪整個卡片區（避免畫面閃爍）
@@ -186,6 +195,13 @@
             badge.classList.add('hidden');
           }
         }
+
+        // 活動截止時鎖定投票按鈕（沿用既有按鈕元素，改文字並停用，不觸發完整重繪）
+        var btn = card.querySelector('.course-cheer-btn');
+        if (btn) {
+          btn.disabled = votingLocked;
+          btn.textContent = votingLocked ? '投票已截止' : '為這堂課集氣';
+        }
       });
       return updated;
     }
@@ -200,18 +216,21 @@
 
       coursesContainer.innerHTML = courses.map(courseCardHtml).join('');
 
-      var buttons = coursesContainer.querySelectorAll('.course-cheer-btn');
-      buttons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          openDialog(btn.getAttribute('data-course-id'), btn.getAttribute('data-course-name'));
+      if (!votingLocked) {
+        var buttons = coursesContainer.querySelectorAll('.course-cheer-btn');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            openDialog(btn.getAttribute('data-course-id'), btn.getAttribute('data-course-name'));
+          });
         });
-      });
+      }
     }
 
     async function refreshStatus() {
       try {
         var data = await window.CheerAPI.fetchStatus();
         if (data && data.success) {
+          votingLocked = !!data.votingLocked;
           renderCourses(data.courses || []);
           updateTime.textContent = '最後更新：' + data.updateTime;
         }

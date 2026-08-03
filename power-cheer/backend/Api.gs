@@ -32,6 +32,7 @@ function getStatus() {
   return {
     success: true,
     eventName: CONFIG.EVENT_NAME,
+    votingLocked: !!CONFIG.VOTING_LOCKED,
     courses: courses,
     updateTime: formatDateTime_(new Date()),
   };
@@ -42,6 +43,10 @@ function getStatus() {
  * payload: { name, email, courseId, ip?, userAgent? }
  */
 function cheer(payload) {
+  if (CONFIG.VOTING_LOCKED) {
+    return { success: false, message: CONFIG.VOTING_LOCKED_MESSAGE };
+  }
+
   var validation = validateCheerInput(payload);
   if (!validation.valid) {
     return { success: false, message: validation.message };

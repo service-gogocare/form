@@ -14,6 +14,10 @@ var CONFIG = {
 
   EVENT_NAME: '積分衝刺月集氣計畫',
 
+  // 活動已截止：鎖定投票（集氣）功能，但頁面仍會顯示課程與目前集氣結果
+  VOTING_LOCKED: true,
+  VOTING_LOCKED_MESSAGE: '活動已截止，感謝大家的熱情參與！',
+
   // 三、未綁定學員方案：熱門課程降價集氣（5 選 1，取自特殊積分 9 堂課，無教師分潤課程）
   // url / imageUrl 取自 GOGOCare 課程平台，供前端封面圖點擊導向課程頁面使用
   COURSES: [
