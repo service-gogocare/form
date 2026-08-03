@@ -317,18 +317,7 @@
     form.addEventListener('submit', handleSubmit);
     closeSuccessBtn.addEventListener('click', hideSuccess);
 
-    refreshStatus();
-    pollTimer = setInterval(refreshStatus, STATUS_POLL_INTERVAL_MS);
-
-    // 頁面隱藏時停止輪詢，回到前景再恢復，節省資源
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        clearInterval(pollTimer);
-      } else {
-        refreshStatus();
-        pollTimer = setInterval(refreshStatus, STATUS_POLL_INTERVAL_MS);
-      }
-    });
+    // 活動已截止：結果已寫死在 0703.html 的靜態卡片內，不再向後端輪詢拉取資料
   }
 
   if (typeof document !== 'undefined') {

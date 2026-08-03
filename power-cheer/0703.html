@@ -44,76 +44,100 @@
 
       <!-- 課程卡片 -->
       <section class="courses-grid" id="coursesContainer" aria-live="polite">
-        <!-- 課程卡片：資料來源 backend/Config.gs → CONFIG.COURSES（以下為靜態備援，app.js 載入後會更新數字）-->
+        <!-- 課程卡片：活動已截止，以下為最終集氣結果快照（純靜態，不再向後端拉資料）-->
 
-        <!-- course-1 -->
+        <!-- course-1（最終：400 人次，已達最高優惠 5折）-->
         <div class="course-card" data-course-id="course-1">
-          <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260605102559001"
-            target="_blank" rel="noopener">
-            <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260605102559001_pic.jpg"
-              alt="消防-火災意外事件處置與應變 封面" loading="lazy" onerror="this.style.display='none'" />
-          </a>
+          <div class="course-cover-wrap">
+            <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260605102559001"
+              target="_blank" rel="noopener">
+              <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260605102559001_pic.jpg"
+                alt="消防-火災意外事件處置與應變 封面" loading="lazy" onerror="this.style.display='none'" />
+            </a>
+            <img class="cover-badge" src="ICON.png" alt="達標" />
+          </div>
           <span class="course-tag">專業品質、消防安全</span>
           <h3 class="course-name">消防-火災意外事件處置與應變</h3>
-          <div class="course-total" id="total-course-1">0 <span>人次集氣</span></div>
+          <div class="course-total" id="total-course-1">400 <span>人次集氣</span></div>
           <div class="progress-bar">
-            <div class="progress-fill" id="progress-course-1" style="width:0%"></div>
+            <div class="progress-fill" id="progress-course-1" style="width:100%"></div>
           </div>
-          <p class="course-discount" id="discount-course-1">再 100 人次解鎖 9折</p>
+          <div class="course-discount" id="discount-course-1">
+            <div class="discount-current">已解鎖 5折</div>
+            <div class="discount-next discount-max">已達最高優惠！</div>
+          </div>
           <button class="cheer-btn" data-course-id="course-1" data-course-name="消防-火災意外事件處置與應變"
             type="button" disabled>投票已截止</button>
         </div>
 
-        <!-- course-2 -->
+        <!-- course-2（最終：299 人次，已解鎖 7折）-->
         <div class="course-card" data-course-id="course-2">
-          <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260401140918001"
-            target="_blank" rel="noopener">
-            <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260401140918001_pic.jpg"
-              alt="針扎預防及通報處理流程 封面" loading="lazy" onerror="this.style.display='none'" />
-          </a>
+          <div class="course-cover-wrap">
+            <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260401140918001"
+              target="_blank" rel="noopener">
+              <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260401140918001_pic.jpg"
+                alt="針扎預防及通報處理流程 封面" loading="lazy" onerror="this.style.display='none'" />
+            </a>
+            <img class="cover-badge hidden" src="ICON.png" alt="達標" />
+          </div>
           <span class="course-tag">專業品質、感染管制</span>
           <h3 class="course-name">針扎預防及通報處理流程</h3>
-          <div class="course-total" id="total-course-2">0 <span>人次集氣</span></div>
+          <div class="course-total" id="total-course-2">299 <span>人次集氣</span></div>
           <div class="progress-bar">
-            <div class="progress-fill" id="progress-course-2" style="width:0%"></div>
+            <div class="progress-fill" id="progress-course-2" style="width:99%"></div>
           </div>
-          <p class="course-discount" id="discount-course-2">再 100 人次解鎖 9折</p>
+          <div class="course-discount" id="discount-course-2">
+            <div class="discount-current">已解鎖 7折</div>
+            <div class="discount-next">再 1 人次解鎖 6折</div>
+          </div>
           <button class="cheer-btn" data-course-id="course-2" data-course-name="針扎預防及通報處理流程"
             type="button" disabled>投票已截止</button>
         </div>
 
-        <!-- course-3 -->
+        <!-- course-3（最終：189 人次，已解鎖 8折）-->
         <div class="course-card" data-course-id="course-3">
-          <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260701101830001"
-            target="_blank" rel="noopener">
-            <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260701101830001_pic.jpg"
-              alt="居家感染控制概論 封面" loading="lazy" onerror="this.style.display='none'" />
-          </a>
+          <div class="course-cover-wrap">
+            <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260701101830001"
+              target="_blank" rel="noopener">
+              <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260701101830001_pic.jpg"
+                alt="居家感染控制概論 封面" loading="lazy" onerror="this.style.display='none'" />
+            </a>
+            <img class="cover-badge hidden" src="ICON.png" alt="達標" />
+          </div>
           <span class="course-tag">專業品質、感染管制</span>
           <h3 class="course-name">居家感染控制概論</h3>
-          <div class="course-total" id="total-course-3">0 <span>人次集氣</span></div>
+          <div class="course-total" id="total-course-3">189 <span>人次集氣</span></div>
           <div class="progress-bar">
-            <div class="progress-fill" id="progress-course-3" style="width:0%"></div>
+            <div class="progress-fill" id="progress-course-3" style="width:89%"></div>
           </div>
-          <p class="course-discount" id="discount-course-3">再 100 人次解鎖 9折</p>
+          <div class="course-discount" id="discount-course-3">
+            <div class="discount-current">已解鎖 8折</div>
+            <div class="discount-next">再 11 人次解鎖 7折</div>
+          </div>
           <button class="cheer-btn" data-course-id="course-3" data-course-name="居家感染控制概論" type="button" disabled>投票已截止</button>
         </div>
 
 
-        <!-- course-5 -->
+        <!-- course-5（最終：401 人次，已達最高優惠 5折）-->
         <div class="course-card" data-course-id="course-5">
-          <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260701095705001"
-            target="_blank" rel="noopener">
-            <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260701095705001_pic.jpg"
-              alt="緊急應變-一氧化碳中毒及天然災害處置 封面" loading="lazy" onerror="this.style.display='none'" />
-          </a>
+          <div class="course-cover-wrap">
+            <a class="course-cover-link" href="https://www.gogocare.com.tw/tw/course/detail/C20260701095705001"
+              target="_blank" rel="noopener">
+              <img class="course-cover" src="https://www.gogocare.com.tw/UserFiles/course/C20260701095705001_pic.jpg"
+                alt="緊急應變-一氧化碳中毒及天然災害處置 封面" loading="lazy" onerror="this.style.display='none'" />
+            </a>
+            <img class="cover-badge" src="ICON.png" alt="達標" />
+          </div>
           <span class="course-tag">專業品質、緊急應變</span>
           <h3 class="course-name">緊急應變-一氧化碳中毒及天然災害處置</h3>
-          <div class="course-total" id="total-course-5">0 <span>人次集氣</span></div>
+          <div class="course-total" id="total-course-5">401 <span>人次集氣</span></div>
           <div class="progress-bar">
-            <div class="progress-fill" id="progress-course-5" style="width:0%"></div>
+            <div class="progress-fill" id="progress-course-5" style="width:100%"></div>
           </div>
-          <p class="course-discount" id="discount-course-5">再 100 人次解鎖 9折</p>
+          <div class="course-discount" id="discount-course-5">
+            <div class="discount-current">已解鎖 5折</div>
+            <div class="discount-next discount-max">已達最高優惠！</div>
+          </div>
           <button class="cheer-btn" data-course-id="course-5" data-course-name="緊急應變-一氧化碳中毒及天然災害處置"
             type="button" disabled>投票已截止</button>
         </div>
@@ -138,7 +162,7 @@
     </main>
 
     <footer class="footer">
-      <div class="update-time" id="updateTime">讀取中...</div>
+      <div class="update-time" id="updateTime">活動已截止，以上為最終集氣結果</div>
       <p>&copy; 2026 GOGOCARE</p>
     </footer>
   </div>
